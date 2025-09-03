@@ -1,0 +1,140 @@
+<!-- Top Bar -->
+<div class="bg-gradient-to-r from-red-600 to-purple-600 text-white py-3 text-sm shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+    <div class="font-semibold text-yellow-200">
+      <%= new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' }) %>
+    </div>
+    <div class="hidden md:block">
+      <div class="flex items-center space-x-4 overflow-x-auto no-scrollbar">
+        <span class="font-extrabold text-yellow-300 tracking-wide whitespace-nowrap animate-pulse">BREAKING:</span>
+        <div class="flex items-center space-x-6 pr-2">
+          <% const _tbList = (typeof topBarList !== 'undefined' && Array.isArray(topBarList)) ? topBarList : []; %>
+          <% if (_tbList.length) { %>
+            <% _tbList.slice(0, 3).forEach(function(item) { %>
+              <a href="<%= item.href %>" class="truncate hover:underline text-yellow-100 hover:text-white max-w-xs transition-colors duration-200"><%= item.title %></a>
+            <% }) %>
+          <% } else { %>
+            <a href="/" class="truncate hover:underline text-yellow-100 hover:text-white max-w-xs transition-colors duration-200">Latest updates coming soon</a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <div class="flex space-x-4">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/dashboard" class="hover:text-yellow-300 flex items-center gap-2 transition-colors duration-200">
+          <i class="fas fa-user text-yellow-300"></i>
+          <span class="hidden sm:inline"><%= user.name || user.fullName || user.email %></span>
+        </a>
+        <a href="/logout" class="hover:text-yellow-300 transition-colors duration-200">
+          <i class="fas fa-sign-out-alt text-yellow-300"></i> Sign out
+        </a>
+      <% } else { %>
+        <a href="/login" class="hover:text-yellow-300 transition-colors duration-200">
+          <i class="fas fa-user text-yellow-300"></i> Sign in
+        </a>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="bg-white shadow-md">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <button id="menuToggle" class="md:hidden mr-4 text-red-600 hover:text-purple-600 transition-colors duration-200" aria-label="Open menu">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+      <a href="/" class="text-3xl font-extrabold text-red-600">VS<span class="font-light text-purple-600">News</span></a>
+    </div>
+
+    <nav class="hidden md:flex space-x-6">
+      <a href="/" class="text-red-600 hover:text-purple-600 font-semibold transition-colors duration-200">Home</a>
+      <a href="/world" class="text-red-600 hover:text-purple-600 font-semibold transition-colors duration-200">World</a>
+      <a href="/politics" class="text-red-600 hover:text-purple-600 font-semibold transition-colors duration-200">Politics</a>
+      <a href="/tech" class="text-red-600 hover:text-purple-600 font-semibold transition-colors duration-200">Tech</a>
+      <a href="/science" class="text-red-600 hover:text-purple-600 font-semibold transition-colors duration-200">Science</a>
+    </nav>
+
+    <div class="flex items-center">
+      <button class="p-2 text-red-600 hover:text-purple-600 transition-colors duration-200" aria-label="Search">
+        <i class="fas fa-search text-xl"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="mobile-menu fixed top-0 left-0 w-full h-full bg-gradient-to-b from-red-700 to-purple-700 text-white z-50 transform -translate-x-full md:hidden" aria-hidden="true">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-8">
+      <div class="text-3xl font-extrabold">VS<span class="font-light"> News</span></div>
+      <button id="closeMenu" class="text-2xl hover:text-yellow-300 transition-colors duration-200" aria-label="Close menu">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <h3 class="font-bold text-lg mb-3 text-yellow-200">Categories</h3>
+        <div class="space-y-2">
+          <a href="/" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Home</a>
+          <a href="/sa" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">SA</a>
+          <a href="/world" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">World</a>
+          <a href="/politics" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Politics</a>
+          <a href="/tech" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Tech</a>
+          <a href="/science" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Science</a>
+          <a href="/health" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Health</a>
+          <a href="/education" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Education</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-bold text-lg mb-3 text-yellow-200">Account</h3>
+        <div class="space-y-2">
+          <% if (typeof user !== 'undefined' && user) { %>
+            <a href="/dashboard" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Account</a>
+            <a href="/logout" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Sign out</a>
+          <% } else { %>
+            <a href="/login" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Sign In</a>
+          <% } %>
+          <a href="/newsletters" class="block py-2 border-b border-yellow-500/30 hover:text-yellow-300 transition-colors duration-200">Newsletters</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mobile menu toggle
+  (function () {
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeMenu = document.getElementById('closeMenu');
+
+    function openMenu() {
+      if (!mobileMenu) return;
+      mobileMenu.classList.remove('-translate-x-full');
+      mobileMenu.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenuFn() {
+      if (!mobileMenu) return;
+      mobileMenu.classList.add('-translate-x-full');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle && menuToggle.addEventListener('click', openMenu);
+    closeMenu && closeMenu.addEventListener('click', closeMenuFn);
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenuFn();
+    });
+
+    // Close when clicking outside of menu content
+    mobileMenu && mobileMenu.addEventListener('click', function (e) {
+      if (e.target === mobileMenu) closeMenuFn();
+    });
+  })();
+</script>

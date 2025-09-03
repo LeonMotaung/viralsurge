@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'ViralSurge' %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'gnn-red': '#BB1919',
+                        'gnn-dark': '#2E2E2E',
+                        'gnn-light': '#F6F6F6',
+                        'gnn-blue': '#1D4ED8',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .hero-image {
+                background-size: cover;
+                background-position: center;
+                transition: transform 0.3s ease;
+            }
+            .hero-image:hover {
+                transform: scale(1.02);
+            }
+            .mobile-menu {
+                transition: transform 0.3s ease-in-out;
+            }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            .card-hover {
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+            .focus-ring {
+                @apply focus:outline-none focus:ring-2 focus:ring-gnn-red focus:ring-offset-2;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gnn-light font-sans antialiased">
+    <% 
+      const safeTopBarDate = (typeof locals !== 'undefined' && typeof locals.topBarDate !== 'undefined' && locals.topBarDate) 
+        ? locals.topBarDate 
+        : (typeof topBarDate !== 'undefined' && topBarDate) ? topBarDate : new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const safeTopBarList = (typeof locals !== 'undefined' && Array.isArray(locals.topBarList)) ? locals.topBarList : ((typeof topBarList !== 'undefined' && Array.isArray(topBarList)) ? topBarList : []);
+      const safeTopBarImage = (typeof locals !== 'undefined' && typeof locals.topBarImage !== 'undefined') ? locals.topBarImage : (typeof topBarImage !== 'undefined' ? topBarImage : null);
+      const safeTopBarTitle = (typeof locals !== 'undefined' && typeof locals.topBarTitle !== 'undefined') ? locals.topBarTitle : (typeof topBarTitle !== 'undefined' ? topBarTitle : '');
+      const safeTopBarLink = (typeof locals !== 'undefined' && typeof locals.topBarLink !== 'undefined') ? locals.topBarLink : (typeof topBarLink !== 'undefined' ? topBarLink : '#');
+    %>
+
+    <%- include('partials/header', {
+      topBarDate: safeTopBarDate,
+      topBarList: safeTopBarList,
+      topBarImage: safeTopBarImage,
+      topBarTitle: safeTopBarTitle,
+      topBarLink: safeTopBarLink
+    }) %>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Breaking News Mobile -->
+        <div class="md:hidden bg-yellow-50 p-4 rounded-lg mb-8">
+            <div class="font-semibold text-yellow-800 mb-2">
+                <a href="/" class="hover:text-gnn-red focus-ring">BREAKING NEWS</a>
+            </div>
+            <div class="flex space-x-4 overflow-x-auto no-scrollbar text-sm">
+                <% if (Array.isArray(safeTopBarList) && safeTopBarList.length) { %>
+                    <% safeTopBarList.slice(0, 3).forEach(function(item) { %>
+                        <a href="<%= item.href %>" class="whitespace-nowrap hover:text-gnn-red focus-ring"><%= item.title %></a>
+                    <% }) %>
+                <% } else { %>
+                    <a href="/" class="whitespace-nowrap hover:text-gnn-red focus-ring">Latest updates coming soon</a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Featured Hero -->
+        <% const heroImageUrlSafe = (typeof heroImageUrl !== 'undefined' && heroImageUrl) ? heroImageUrl : 'https://via.placeholder.com/1600x900?text=No+Image'; %>
+        <div class="bg-white rounded-lg shadow-card overflow-hidden mb-12 card-hover">
+            <div class="hero-image h-64 sm:h-80 md:h-96 flex items-end p-6 text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('<%= heroImageUrlSafe %>')">
+                <div>
+                    <% if (hero && Array.isArray(hero.categories) && hero.categories.length) { %>
+                        <span class="bg-gnn-red px-3 py-1 text-sm rounded-full"><%= hero.categories[0] %></span>
+                    <% } %>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 leading-tight">
+                        <%= hero ? hero.title : 'Latest story' %>
+                    </h1>
+                    <% if (hero && hero.excerpt) { %>
+                        <p class="mt-2 text-sm md:text-base text-gray-200"><%= hero.excerpt %></p>
+                    <% } %>
+                    <div class="flex items-center mt-4 text-sm text-gray-300">
+                        <i class="far fa-clock mr-2"></i>
+                        <span><%= hero && hero.createdAt ? new Date(hero.createdAt).toLocaleString() : '' %></span>
+                        <% if (hero && (hero.author || hero.createdAt)) { %>
+                            <span class="mx-2">|</span>
+                        <% } %>
+                        <span><%= hero && hero.author ? hero.author : '' %></span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <% if (hero) { %>
+                    <a href="<%= hero.slug ? ('/a/' + hero.slug) : (hero._id ? ('/a/' + hero._id) : '/') %>" class="text-gnn-red font-semibold hover:underline focus-ring">Read full story <i class="fas fa-arrow-right ml-1"></i></a>
+                <% } else { %>
+                    <p class="mb-4 text-gray-600">Stay tuned for our latest featured story.</p>
+                    <a href="/" class="text-gnn-red font-semibold hover:underline focus-ring">Read full story <i class="fas fa-arrow-right ml-1"></i></a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Articles Grid -->
+        <% const recentArticles = Array.isArray(typeof articles !== 'undefined' ? articles : []) ? (articles || []) : []; %>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <% recentArticles.slice(0,4).forEach(function(a) { 
+                 const img = a && a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a && a.featuredImageUrl ? a.featuredImageUrl : 'https://via.placeholder.com/800x480?text=No+Image');
+                 const articleUrl = '/a/' + (a && (a._id || a.slug) ? (a._id || a.slug) : '');
+            %>
+            <div class="bg-white rounded-lg shadow-card overflow-hidden card-hover">
+                <img src="<%= img %>" alt="<%= a && a.title ? a.title : 'Article' %>" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <% if (a && a.categories && a.categories.length) { %>
+                        <span class="bg-gnn-red text-white px-2 py-1 text-xs rounded-full"><%= a.categories[0] %></span>
+                    <% } %>
+                    <div class="flex items-start justify-between gap-4">
+                        <h2 class="text-lg font-semibold mt-2 mb-2 leading-tight">
+                            <a href="<%= articleUrl %>" class="hover:text-gnn-red focus-ring"><%= a && a.title ? a.title : 'Untitled' %></a>
+                        </h2>
+                        <button
+                            class="index-share-btn text-gray-500 hover:text-gnn-red p-2 rounded-full focus-ring"
+                            data-url="<%= articleUrl %>"
+                            aria-label="Share article">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-3"><%= a && a.excerpt ? a.excerpt : '' %></p>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span><%= a && a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '' %></span>
+                        <span><%= a && a.views ? (a.views + ' views') : '' %></span>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- More News -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold border-l-4 border-gnn-red pl-3 mb-6">More News</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <% const categoriesLatestList = (typeof categoriesLatest !== 'undefined' && Array.isArray(categoriesLatest)) ? categoriesLatest : []; %>
+                <% if (categoriesLatestList.length > 0) { %>
+                    <% categoriesLatestList.forEach(function(item) { 
+                         const cat = item.category;
+                         const a = item.article || {};
+                         const img = a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a.featuredImageUrl || 'https://via.placeholder.com/800x480?text=No+Image');
+                         const href = a.slug ? ('/a/' + a.slug) : (a._id ? ('/a/' + a._id) : '/');
+                    %>
+                    <div class="bg-white rounded-lg shadow-card p-5 card-hover">
+                        <% if (cat) { %>
+                            <span class="bg-gnn-red text-white px-2 py-1 text-xs rounded-full"><%= cat %></span>
+                        <% } %>
+                        <h3 class="font-semibold text-lg mt-2 mb-2">
+                            <a href="<%= href %>" class="hover:text-gnn-red focus-ring"><%= a.title || 'Untitled' %></a>
+                        </h3>
+                        <% if (a.excerpt) { %>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2"><%= a.excerpt %></p>
+                        <% } else { %>
+                            <img src="<%= img %>" alt="thumb" class="w-full h-28 object-cover rounded mb-4">
+                        <% } %>
+                        <div class="text-xs text-gray-500"><%= a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '' %></div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="bg-white rounded-lg shadow-card p-5 card-hover">
+                        <span class="bg-gnn-red text-white px-2 py-1 text-xs rounded-full">Business</span>
+                        <h3 class="font-semibold text-lg mt-2 mb-2">
+                            <a href="/" class="hover:text-gnn-red focus-ring">Global Markets Rally After Policy Shift</a>
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">Central banks coordinate response to economic challenges, sparking investor confidence.</p>
+                        <div class="text-xs text-gray-500">August 27, 2025</div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-card p-5 card-hover">
+                        <span class="bg-gnn-red text-white px-2 py-1 text-xs rounded-full">Health</span>
+                        <h3 class="font-semibold text-lg mt-2 mb-2">
+                            <a href="/" class="hover:text-gnn-red focus-ring">Breakthrough in Cancer Treatment Shows Promise</a>
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">New immunotherapy approach demonstrates significant results in clinical trials.</p>
+                        <div class="text-xs text-gray-500">August 26, 2025</div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-card p-5 card-hover">
+                        <span class="bg-gnn-red text-white px-2 py-1 text-xs rounded-full">Sports</span>
+                        <h3 class="font-semibold text-lg mt-2 mb-2">
+                            <a href="/" class="hover:text-gnn-red focus-ring">Underdog Team Wins Championship in Historic Final</a>
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">Last-minute goal secures victory in one of the most watched sporting events of the year.</p>
+                        <div class="text-xs text-gray-500">August 25, 2025</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Most Read -->
+        <% const mostReadListSafe = (typeof mostReadList !== 'undefined' && Array.isArray(mostReadList)) ? mostReadList : [
+            {title:'Global Markets Rally After Policy Shift', href:'/', date:'August 30, 2025', section:'Business'},
+            {title:'Health Agencies Advise New Seasonal Vaccination', href:'/', date:'August 29, 2025', section:'Health'},
+            {title:'Breakthrough in Renewable Energy Storage Announced', href:'/', date:'August 28, 2025', section:'Science'},
+            {title:'Major Tech Firm Unveils Next-Gen AI Platform', href:'/', date:'August 27, 2025', section:'Tech'},
+            {title:'Local Community Wins Landmark Environmental Case', href:'/', date:'August 26, 2025', section:'Local'}
+        ]; %>
+        <div class="bg-white rounded-lg shadow-card p-6 mb-12">
+            <h2 class="text-2xl font-bold border-l-4 border-gnn-red pl-3 mb-6">Most Read</h2>
+            <ol class="list-decimal list-inside space-y-4">
+                <% mostReadListSafe.slice(0,5).forEach(function(item){ %>
+                <li class="pb-4 border-b border-gray-100">
+                    <a href="<%= item.href || '/' %>" class="font-semibold hover:text-gnn-red focus-ring"><%= item.title %></a>
+                    <div class="text-xs text-gray-500 mt-1"><%= item.date %> <% if (item.section) { %>| <%= item.section %> <% } %></div>
+                </li>
+                <% }) %>
+            </ol>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="bg-gnn-blue text-white rounded-lg shadow-card p-6 mb-12">
+            <div class="md:flex items-center justify-between gap-6">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold mb-2">Stay Informed</h2>
+                    <p class="text-sm">Subscribe to our daily newsletter for the latest news updates</p>
+                </div>
+                <form class="flex w-full md:w-auto" method="post" action="/subscribe">
+                    <input name="email" type="email" placeholder="Your email address" class="px-4 py-2 rounded-l-lg text-gray-800 w-full md:w-64 focus-ring" required>
+                    <button class="bg-gnn-red px-4 py-2 rounded-r-lg font-semibold hover:bg-red-700 focus-ring">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <%- include('partials/footer') %>
+
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const closeMenu = document.getElementById('closeMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', () => mobileMenu.classList.remove('-translate-x-full'));
+        }
+        if (closeMenu && mobileMenu) {
+            closeMenu.addEventListener('click', () => mobileMenu.classList.add('-translate-x-full'));
+        }
+
+        // Share button functionality with copy-to-clipboard
+        document.querySelectorAll('.index-share-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const url = (btn.dataset.url) ? (location.origin + btn.dataset.url) : location.href;
+                async function copyText(text) {
+                    if (!text) return false;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+                    }
+                    try {
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.setAttribute('readonly', '');
+                        ta.style.position = 'fixed';
+                        ta.style.left = '-9999px';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        const ok = document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        return ok;
+                    } catch (e) { return false; }
+                }
+                try {
+                    const ok = await copyText(url);
+                    const old = btn.innerHTML;
+                    if (ok) {
+                        btn.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                        btn.classList.add('animate-pulse');
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-exclamation text-yellow-500"></i>';
+                    }
+                    setTimeout(() => {
+                        btn.classList.remove('animate-pulse');
+                        btn.innerHTML = old;
+                    }, 1400);
+                } catch (e) {
+                    console.error('Copy failed', e);
+                }
+            });
+        });
+
+        // Related articles carousel controls
+        (function () {
+            const prev = document.getElementById('rel-prev');
+            const next = document.getElementById('rel-next');
+            const inner = document.getElementById('relatedInner');
+            const carousel = document.getElementById('relatedCarousel');
+            if (!inner || !carousel) return;
+
+            const item = inner.firstElementChild;
+            let index = 0;
+
+            function itemWidth() {
+                if (!item) return 260;
+                const gap = parseFloat(getComputedStyle(inner).gap || 16);
+                return Math.round(item.getBoundingClientRect().width + gap);
+            }
+
+            function visibleCount() {
+                const w = carousel.getBoundingClientRect().width;
+                return Math.max(1, Math.floor(w / itemWidth()));
+            }
+
+            function update() {
+                const iw = itemWidth();
+                const visible = visibleCount();
+                const maxIndex = Math.max(0, inner.children.length - visible);
+                index = Math.min(Math.max(0, index), maxIndex);
+                inner.style.transform = `translateX(-${index * iw}px)`;
+                if (prev) prev.style.display = (index > 0) ? 'block' : 'none';
+                if (next) next.style.display = (index < maxIndex) ? 'block' : 'none';
+            }
+
+            if (prev) prev.addEventListener('click', () => { index = Math.max(0, index - 1); update(); });
+            if (next) next.addEventListener('click', () => { index = Math.min(inner.children.length - 1, index + 1); update(); });
+
+            window.addEventListener('resize', () => setTimeout(update, 120));
+            setTimeout(update, 200);
+        })();
+    </script>
+</body>
+</html>

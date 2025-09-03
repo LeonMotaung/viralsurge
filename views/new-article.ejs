@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title || 'Create Article' %> | ViralSurge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #64748b;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --light: #f8fafc;
+        --dark: #1e293b;
+        --gray: #94a3b8;
+        --border: #e2e8f0;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f1f5f9;
+        color: var(--dark);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      /* Header Styles */
+      header {
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .back-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      .back-link:hover {
+        color: var(--primary);
+      }
+
+      /* Main Content */
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 2rem 0;
+      }
+
+      @media (min-width: 1024px) {
+        .main-content {
+          grid-template-columns: 1fr 320px;
+        }
+      }
+
+      /* Card Styles */
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      /* Form Styles */
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      textarea.form-control {
+        min-height: 160px;
+        resize: vertical;
+      }
+
+      .form-hint {
+        font-size: 0.875rem;
+        color: var(--secondary);
+        margin-top: 0.5rem;
+      }
+
+      /* Grid System */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .form-grid-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* File Upload */
+      .file-upload {
+        padding: 1rem;
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .file-upload:hover {
+        border-color: var(--primary);
+      }
+
+      .file-upload i {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      /* Checkbox */
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .checkbox {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .btn-secondary {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .btn-secondary:hover {
+        background: var(--gray);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+      }
+
+      /* Sidebar */
+      .sidebar-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+      }
+
+      .sidebar-header {
+        padding: 1.25rem;
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .sidebar-body {
+        padding: 1.25rem;
+      }
+
+      .tip-list {
+        list-style: none;
+      }
+
+      .tip-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+
+      .tip-list li:last-child {
+        border-bottom: none;
+      }
+
+      .tip-icon {
+        color: var(--primary);
+        font-size: 1.25rem;
+      }
+
+      /* Status Badges */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .status-draft {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .status-pending {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .status-published {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      /* Footer */
+      footer {
+        background: white;
+        border-top: 1px solid var(--border);
+        padding: 1.5rem 0;
+        margin-top: 3rem;
+        text-align: center;
+        color: var(--secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <a href="/admin" class="logo">
+            <i class="fas fa-bolt"></i>
+            ViralSurge
+          </a>
+          <a href="/admin" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Admin Dashboard
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="main-content">
+        <div class="card">
+          <div class="card-header">
+            <h1 class="card-title">
+              <i class="fas fa-plus-circle"></i>
+              Create New Article
+            </h1>
+          </div>
+          <div class="card-body">
+            <form method="post" action="/admin/articles" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="title" class="form-label">
+                  <i class="fas fa-heading"></i>
+                  Title
+                </label>
+                <input id="title" name="title" type="text" class="form-control" required placeholder="e.g. New Law Passed in South Africa" />
+                <p class="form-hint">Clear, catchy, and SEO-optimized title works best</p>
+              </div>
+
+              <div class="form-group">
+                <label for="slug" class="form-label">
+                  <i class="fas fa-link"></i>
+                  Slug / URL
+                </label>
+                <input id="slug" name="slug" type="text" class="form-control" placeholder="auto-generated-from-title" />
+                <p class="form-hint">Auto-generated from Title, but editable for customization</p>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="categories" class="form-label">
+                    <i class="fas fa-folder"></i>
+                    Categories
+                  </label>
+                  <input id="categories" name="categories" type="text" class="form-control" placeholder="Politics, Business, Sports" />
+                  <p class="form-hint">Comma separated values</p>
+                </div>
+                <div class="form-group">
+                  <label for="tags" class="form-label">
+                    <i class="fas fa-tags"></i>
+                    Tags
+                  </label>
+                  <input id="tags" name="tags" type="text" class="form-control" placeholder="South Africa, Elections, Parliament" />
+                  <p class="form-hint">Comma separated keywords</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="content" class="form-label">
+                  <i class="fas fa-file-alt"></i>
+                  Content
+                </label>
+                <textarea id="content" name="content" class="form-control" placeholder="Full article text (use headings, links, quotes, lists, etc.)"></textarea>
+                <p class="form-hint">For rich text, we can integrate a WYSIWYG editor (Quill/CKEditor) next</p>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="featuredImage" class="form-label">
+                    <i class="fas fa-image"></i>
+                    Featured Image
+                  </label>
+                  <div class="file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload or drag and drop</p>
+                    <input id="featuredImage" name="featuredImage" type="file" class="form-control" accept="image/*" style="display: none;" />
+                  </div>
+                  <p class="form-hint">Used on homepage & previews (Max 10MB)</p>
+                </div>
+                <div class="form-group">
+                  <label for="media" class="form-label">
+                    <i class="fas fa-photo-video"></i>
+                    Additional Media
+                  </label>
+                  <div class="file-upload">
+                    <i class="fas fa-images"></i>
+                    <p>Click to upload multiple files</p>
+                    <input id="media" name="media" type="file" class="form-control" accept="image/*,video/*" multiple style="display: none;" />
+                  </div>
+                  <p class="form-hint">Upload multiple images or videos (Max 10MB each)</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="excerpt" class="form-label">
+                  <i class="fas fa-align-left"></i>
+                  Excerpt / Summary
+                </label>
+                <textarea id="excerpt" name="excerpt" class="form-control" placeholder="Short intro (1–2 sentences)"></textarea>
+                <p class="form-hint">Brief summary for article previews</p>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="metaTitle" class="form-label">
+                    <i class="fas fa-globe"></i>
+                    Meta Title
+                  </label>
+                  <input id="metaTitle" name="metaTitle" type="text" class="form-control" />
+                  <p class="form-hint">SEO meta title (different from article title)</p>
+                </div>
+                <div class="form-group">
+                  <label for="metaDescription" class="form-label">
+                    <i class="fas fa-globe"></i>
+                    Meta Description
+                  </label>
+                  <input id="metaDescription" name="metaDescription" type="text" class="form-control" />
+                  <p class="form-hint">SEO meta description for search engines</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="seoKeywords" class="form-label">
+                  <i class="fas fa-search"></i>
+                  SEO Keywords
+                </label>
+                <input id="seoKeywords" name="seoKeywords" type="text" class="form-control" placeholder="comma,separated,keywords" />
+                <p class="form-hint">Keywords for search engine optimization</p>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="author" class="form-label">
+                    <i class="fas fa-user-edit"></i>
+                    Author
+                  </label>
+                  <input id="author" name="author" type="text" class="form-control" placeholder="Defaults to logged-in admin" />
+                </div>
+                <div class="form-group">
+                  <label for="status" class="form-label">
+                    <i class="fas fa-toggle-on"></i>
+                    Status
+                  </label>
+                  <select id="status" name="status" class="form-control">
+                    <option value="draft">Draft</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="scheduleAt" class="form-label">
+                    <i class="fas fa-clock"></i>
+                    Schedule Publish Date
+                  </label>
+                  <input id="scheduleAt" name="scheduleAt" type="datetime-local" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-star"></i>
+                    Article Options
+                  </label>
+                  <div class="checkbox-group">
+                    <input id="featured" name="featured" type="checkbox" class="checkbox" />
+                    <label for="featured">Featured / Highlight</label>
+                  </div>
+                  <div class="checkbox-group">
+                    <input id="commentsEnabled" name="commentsEnabled" type="checkbox" class="checkbox" checked />
+                    <label for="commentsEnabled">Comments Enabled</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label for="location" class="form-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Location / Region
+                  </label>
+                  <input id="location" name="location" type="text" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="source" class="form-label">
+                    <i class="fas fa-link"></i>
+                    Source / References
+                  </label>
+                  <input id="source" name="source" type="text" class="form-control" />
+                </div>
+              </div>
+
+              <div class="action-buttons">
+                <a href="/admin" class="btn btn-secondary">
+                  <i class="fas fa-times"></i>
+                  Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i>
+                  Save Article
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <i class="fas fa-lightbulb"></i>
+            Article Tips
+          </div>
+          <div class="sidebar-body">
+            <ul class="tip-list">
+              <li>
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div>
+                  <strong>Title should be clear and SEO-friendly</strong>
+                  <p class="form-hint">Aim for 50-60 characters including spaces</p>
+                </div>
+              </li>
+              <li>
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div>
+                  <strong>Use categories and tags effectively</strong>
+                  <p class="form-hint">Improves discoverability and organization</p>
+                </div>
+              </li>
+              <li>
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div>
+                  <strong>Add an excerpt for previews</strong>
+                  <p class="form-hint">Appears on lists and social media shares</p>
+                </div>
+              </li>
+              <li>
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div>
+                  <strong>Optimize images before uploading</strong>
+                  <p class="form-hint">Faster loading times improve user experience</p>
+                </div>
+              </li>
+              <li>
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div>
+                  <strong>Set appropriate status</strong>
+                  <p class="form-hint">Draft, Pending, or Published based on readiness</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2023 ViralSurge. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Slug generation from title
+      const titleEl = document.getElementById('title');
+      const slugEl = document.getElementById('slug');
+      
+      function slugify(s) {
+        return (s || '').toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-')
+          .slice(0, 120);
+      }
+      
+      titleEl?.addEventListener('input', () => {
+        if (!slugEl.value) {
+          slugEl.value = slugify(titleEl.value);
+        }
+      });
+
+      // File upload enhancement
+      const featuredImageInput = document.getElementById('featuredImage');
+      const featuredImageUpload = featuredImageInput.parentElement;
+      const mediaInput = document.getElementById('media');
+      const mediaUpload = mediaInput.parentElement;
+
+      featuredImageUpload.addEventListener('click', () => {
+        featuredImageInput.click();
+      });
+
+      mediaUpload.addEventListener('click', () => {
+        mediaInput.click();
+      });
+
+      featuredImageInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          featuredImageUpload.querySelector('p').textContent = this.files[0].name;
+        }
+      });
+
+      mediaInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          mediaUpload.querySelector('p').textContent = `${this.files.length} file(s) selected`;
+        }
+      });
+
+      // Drag and drop functionality
+      [featuredImageUpload, mediaUpload].forEach(uploadArea => {
+        uploadArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uploadArea.style.borderColor = 'var(--primary)';
+          uploadArea.style.backgroundColor = 'rgba(37, 99, 235, 0.05)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+          uploadArea.style.borderColor = 'var(--border)';
+          uploadArea.style.backgroundColor = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadArea.style.borderColor = 'var(--border)';
+          uploadArea.style.backgroundColor = 'transparent';
+          
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const input = uploadArea.querySelector('input[type="file"]');
+            input.files = files;
+            
+            if (input === featuredImageInput) {
+              uploadArea.querySelector('p').textContent = files[0].name;
+            } else {
+              uploadArea.querySelector('p').textContent = `${files.length} file(s) selected`;
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

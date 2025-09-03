@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title || 'Edit Article' %> | ViralSurge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f1f5f9; color: #0f172a; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+      header { background: #fff; border-bottom: 1px solid #e2e8f0; }
+      .header-content { display:flex; align-items:center; justify-content:space-between; padding: 1rem 0; }
+      .logo { color:#2563eb; text-decoration:none; font-weight:700; }
+      .back { color:#64748b; text-decoration:none; }
+      .card { background:#fff; border:1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); overflow:hidden; }
+      .card-header { padding:1rem 1.25rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:.6rem; font-weight:600; }
+      .card-body { padding:1.25rem; }
+      .form-group { margin-bottom: 1rem; }
+      .form-label { display:block; font-weight:600; margin-bottom:.35rem; color:#0f172a; }
+      .form-control, select, textarea { width:100%; padding:.65rem .8rem; border:1px solid #e2e8f0; border-radius:8px; font-size:1rem; }
+      textarea { min-height: 180px; }
+      .row { display:grid; grid-template-columns: 1fr; gap:1rem; }
+      @media (min-width: 900px) { .row.two { grid-template-columns: 1fr 1fr; } }
+      .actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1rem; }
+      .btn { border:0; border-radius:8px; padding:.7rem 1.1rem; cursor:pointer; font-weight:600; }
+      .btn-primary { background:#2563eb; color:#fff; }
+      .btn-secondary { background:#e2e8f0; }
+      footer { text-align:center; color:#64748b; margin:2rem 0 1rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <a href="/admin" class="logo"><i class="fas fa-bolt"></i> ViralSurge</a>
+          <a href="/admin" class="back"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-edit"></i> Edit Article
+        </div>
+        <div class="card-body">
+          <form method="post" action="/admin/articles/<%= article._id %>" enctype="multipart/form-data">
+            <div class="form-group">
+              <label class="form-label" for="title">Title</label>
+              <input id="title" name="title" class="form-control" type="text" value="<%- article.title || '' %>" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="slug">Slug / URL</label>
+              <input id="slug" name="slug" class="form-control" type="text" value="<%- article.slug || '' %>" />
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="categories">Categories (comma separated)</label>
+                <input id="categories" name="categories" class="form-control" type="text" value="<%- (article.categories || []).join(', ') %>" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tags">Tags (comma separated)</label>
+                <input id="tags" name="tags" class="form-control" type="text" value="<%- (article.tags || []).join(', ') %>" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="content">Content</label>
+              <textarea id="content" name="content"><%- article.content || '' %></textarea>
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="author">Author</label>
+                <input id="author" name="author" class="form-control" type="text" value="<%- article.author || '' %>" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="status">Status</label>
+                <select id="status" name="status">
+                  <option value="draft" <%= article.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                  <option value="pending" <%= article.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                  <option value="published" <%= article.status === 'published' ? 'selected' : '' %>>Published</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="metaTitle">Meta Title</label>
+                <input id="metaTitle" name="metaTitle" class="form-control" type="text" value="<%- article.metaTitle || '' %>" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="metaDescription">Meta Description</label>
+                <input id="metaDescription" name="metaDescription" class="form-control" type="text" value="<%- article.metaDescription || '' %>" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="seoKeywords">SEO Keywords (comma separated)</label>
+              <input id="seoKeywords" name="seoKeywords" class="form-control" type="text" value="<%- (article.seoKeywords || []).join(', ') %>" />
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="excerpt">Excerpt</label>
+                <textarea id="excerpt" name="excerpt"><%- article.excerpt || '' %></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="scheduleAt">Schedule At</label>
+                <input id="scheduleAt" name="scheduleAt" class="form-control" type="datetime-local" value="<%- (article.scheduleAt ? new Date(article.scheduleAt).toISOString().slice(0,16) : '') %>">
+              </div>
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="location">Location</label>
+                <input id="location" name="location" class="form-control" type="text" value="<%- article.location || '' %>" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="source">Source</label>
+                <input id="source" name="source" class="form-control" type="text" value="<%- article.source || '' %>" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Featured</label>
+              <input type="checkbox" id="featured" name="featured" <%= article.featured ? 'checked' : '' %> />
+              <label for="featured">Mark as featured</label>
+            </div>
+
+            <div class="row two">
+              <div class="form-group">
+                <label class="form-label" for="featuredImage">Replace Featured Image</label>
+                <input id="featuredImage" name="featuredImage" type="file" accept="image/*" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="media">Add Media (multiple)</label>
+                <input id="media" name="media" type="file" multiple />
+              </div>
+            </div>
+
+            <div class="actions">
+              <a class="btn btn-secondary" href="/admin">Cancel</a>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; <%= new Date().getFullYear() %> ViralSurge</p>
+      </div>
+    </footer>
+  </body>
+</html>

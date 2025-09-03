@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - ViralSurge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'gnn-red': '#BB1919',
+                        'gnn-dark': '#2E2E2E',
+                        'gnn-light': '#F6F6F6',
+                        'gnn-blue': '#1D4ED8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .hero-image {
+                background-size: cover;
+                background-position: center;
+            }
+            .mobile-menu {
+                transition: transform 0.3s ease-in-out;
+            }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+    </style>
+</head>
+<body class="bg-gnn-light">
+    <% /* safe fallbacks so includes don't throw */ %>
+    <% const _topBarDate = (typeof topBarDate !== 'undefined' && topBarDate) ? topBarDate : new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); %>
+    <% const _topBarList = Array.isArray(topBarList) ? topBarList : []; %>
+    <% const _topBarImage = (typeof topBarImage !== 'undefined' ? topBarImage : null); %>
+    <% const _topBarTitle = (typeof topBarTitle !== 'undefined' ? topBarTitle : ''); %>
+    <% const _topBarLink = (typeof topBarLink !== 'undefined' ? topBarLink : '#'); %>
+
+    <%- include('partials/header', {
+      topBarDate: _topBarDate,
+      topBarList: _topBarList,
+      topBarImage: _topBarImage,
+      topBarTitle: _topBarTitle,
+      topBarLink: _topBarLink
+    }) %>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Register Form Section -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+            <!-- Register Form -->
+            <div class="w-full md:w-1/2 lg:w-2/5 bg-white rounded-lg shadow-md p-8">
+                <h1 class="text-3xl font-bold text-gnn-dark mb-2">Create Account</h1>
+                <p class="text-gray-600 mb-6">Join ViralSurge and stay informed</p>
+                
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                        <p><%= error %></p>
+                    </div>
+                <% } %>
+                
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+                        <p><%= success %></p>
+                    </div>
+                <% } %>
+                
+                <form action="/register" method="POST">
+                    <div class="mb-4">
+                        <label for="fullName" class="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="fullName" 
+                            name="fullName" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gnn-red"
+                            placeholder="John Doe"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gnn-red"
+                            placeholder="your.email@example.com"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gnn-red"
+                            placeholder="••••••••"
+                        >
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="confirmPassword" class="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gnn-red"
+                            placeholder="••••••••"
+                        >
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="terms" required class="mr-2">
+                            <span class="text-sm text-gray-700">
+                                I agree to the <a href="/terms" class="text-gnn-blue hover:underline">Terms of Service</a> and <a href="/privacy" class="text-gnn-blue hover:underline">Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <button 
+                            type="submit" 
+                            class="w-full bg-gnn-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-800 transition duration-200"
+                        >
+                            Create Account
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-gray-600">
+                            Already have an account? 
+                            <a href="/login" class="text-gnn-blue font-bold hover:underline">Sign in</a>
+                        </p>
+                    </div>
+                </form>
+                
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or register with</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="/auth/google" class="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2 px-4 text-gray-700 font-medium hover:bg-gray-50 transition duration-200">
+                        <i class="fab fa-google text-red-500"></i>
+                        <span>Google</span>
+                    </a>
+                    <a href="/auth/facebook" class="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2 px-4 text-gray-700 font-medium hover:bg-gray-50 transition duration-200">
+                        <i class="fab fa-facebook text-blue-600"></i>
+                        <span>Facebook</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Side Content -->
+            <div class="w-full md:w-1/2 lg:w-2/5">
+                <div class="bg-gnn-blue text-white rounded-lg shadow-md p-8 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Why join ViralSurge?</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-newspaper mt-1 mr-3"></i>
+                            <span>Personalized news feed based on your interests</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-comment-alt mt-1 mr-3"></i>
+                            <span>Comment on articles and join discussions</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-bookmark mt-1 mr-3"></i>
+                            <span>Save articles to read later</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-bell mt-1 mr-3"></i>
+                            <span>Get notifications for breaking news</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-share-alt mt-1 mr-3"></i>
+                            <span>Share articles with friends and family</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-chart-line mt-1 mr-3"></i>
+                            <span>Track trending topics and stories</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Member Benefits</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Ad-free browsing experience</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Exclusive content access</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Early access to breaking news</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Customizable news preferences</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <%- include('partials/footer') %>
+
+    <script>
+        // Mobile menu functionality (guarded)
+        const menuToggle = document.getElementById('menuToggle');
+        const closeMenu = document.getElementById('closeMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (menuToggle && mobileMenu) menuToggle.addEventListener('click', () => mobileMenu.classList.remove('-translate-x-full'));
+        if (closeMenu && mobileMenu) closeMenu.addEventListener('click', () => mobileMenu.classList.add('-translate-x-full'));
+        
+        // Password confirmation validation
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        
+        function validatePassword() {
+            if (passwordField.value !== confirmPasswordField.value) {
+                confirmPasswordField.setCustomValidity('Passwords do not match');
+            } else {
+                confirmPasswordField.setCustomValidity('');
+            }
+        }
+        
+        if (passwordField && confirmPasswordField) {
+            passwordField.addEventListener('change', validatePassword);
+            confirmPasswordField.addEventListener('keyup', validatePassword);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   <%= title || 'Admin Panel' %>
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+ </head>
+ <body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-md sticky top-0 z-30">
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+    <div class="flex items-center space-x-3">
+     <img alt="News Admin Panel Logo, a stylized newspaper icon in blue and white" class="h-10 w-10 rounded" height="40" src="https://storage.googleapis.com/a1aa/image/174e23b1-2101-4bb9-839a-9e1074e25bb2.jpg" width="40"/>
+     <h1 class="text-xl font-semibold text-gray-900">
+      <%= header || title || 'Admin Panel' %>
+     </h1>
+    </div>
+    <nav class="hidden md:flex space-x-6 text-gray-700 font-medium">
+     <a class="hover:text-blue-600 transition" href="#dashboard">
+      Dashboard
+     </a>
+     <a class="hover:text-blue-600 transition" href="#articles">
+      Articles
+     </a>
+     <a class="hover:text-blue-600 transition" href="#categories">
+      Categories
+     </a>
+     <a class="hover:text-blue-600 transition" href="#media">
+      Media Library
+     </a>
+     <a class="hover:text-blue-600 transition flex items-center space-x-2" href="#profile">
+      <i class="fas fa-user-circle text-lg">
+      </i>
+      <span>
+       <%= (user && user.name) || 'Admin' %>
+      </span>
+     </a>
+    </nav>
+    <button aria-label="Open menu" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500" id="mobile-menu-button">
+     <i class="fas fa-bars fa-lg">
+     </i>
+    </button>
+   </div>
+   <!-- Mobile menu -->
+   <nav aria-label="Mobile menu" class="hidden md:hidden bg-white border-t border-gray-200" id="mobile-menu">
+    <a class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium" href="#dashboard">
+     Dashboard
+    </a>
+    <a class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium" href="#articles">
+     Articles
+    </a>
+    <a class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium" href="#categories">
+     Categories
+    </a>
+    <a class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium" href="#media">
+     Media Library
+    </a>
+    <a class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium flex items-center space-x-2" href="#profile">
+     <i class="fas fa-user-circle text-lg">
+     </i>
+     <span>
+      <%= (user && user.name) || 'Admin' %>
+     </span>
+    </a>
+   </nav>
+  </header>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+   <!-- Dashboard Section -->
+   <section class="mb-12" id="dashboard">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+     <h2 class="text-2xl font-semibold text-gray-900">
+      Dashboard Overview
+     </h2>
+     <a href="/admin/articles/new" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      <i class="fas fa-plus mr-2"></i>
+      Create New Article
+     </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+     <div class="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+      <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+       <i class="fas fa-newspaper fa-2x">
+       </i>
+      </div>
+      <div>
+       <p class="text-3xl font-semibold text-gray-900">
+        <%= (metrics && metrics.totalPublished) || 0 %>
+       </p>
+       <p class="text-gray-500">
+        Total Articles Published
+       </p>
+      </div>
+     </div>
+     <div class="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+      <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+       <i class="fas fa-clock fa-2x">
+       </i>
+      </div>
+      <div>
+       <p class="text-3xl font-semibold text-gray-900">
+        <%= (metrics && metrics.pendingCount) || 0 %>
+       </p>
+       <p class="text-gray-500">
+        Articles Pending Approval
+       </p>
+      </div>
+     </div>
+     <div class="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+      <div class="p-3 rounded-full bg-green-100 text-green-600">
+       <i class="fas fa-tags fa-2x">
+       </i>
+      </div>
+      <div>
+       <p class="text-3xl font-semibold text-gray-900">
+        <%= (metrics && metrics.categoriesCount) || 0 %>
+       </p>
+       <p class="text-gray-500">
+        Categories
+       </p>
+      </div>
+     </div>
+     <div class="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+      <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+       <i class="fas fa-comments fa-2x">
+       </i>
+      </div>
+      <div>
+       <p class="text-3xl font-semibold text-gray-900">
+        <%= (metrics && metrics.commentsCount) || 0 %>
+       </p>
+       <p class="text-gray-500">
+        Recent Comments
+       </p>
+      </div>
+     </div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+     <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      Articles Published Per Week
+     </h3>
+     <canvas class="w-full h-48" id="articlesChart">
+     </canvas>
+    </div>
+   </section>
+   <!-- Articles Section -->
+   <section class="mb-12" id="articles">
+    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+     Article Management
+    </h2>
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+     <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+       <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Title
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Author
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Category
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Status
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Published Date
+        </th>
+        <th class="relative px-6 py-3" scope="col">
+         <span class="sr-only">
+          Edit
+         </span>
+        </th>
+       </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% if (Array.isArray(articles) && articles.length) { %>
+          <% articles.forEach(function(a){ %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= a.title || '(untitled)' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <%= a.author || 'Admin' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <%= (Array.isArray(a.categories) && a.categories[0]) ? a.categories[0] : '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <% const st = (a.status || 'draft').toLowerCase(); %>
+                <% const badge = st === 'published' ? 'bg-green-100 text-green-800' : (st === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'); %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= badge %>">
+                  <%= st.charAt(0).toUpperCase() + st.slice(1) %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <%= a.createdAt ? new Date(a.createdAt).toISOString().slice(0,10) : '-' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                <a aria-label="Edit article" href="/admin/articles/<%= a._id %>/edit" class="text-blue-600 hover:text-blue-900 focus:outline-none">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button aria-label="Delete article" class="text-red-600 hover:text-red-900 focus:outline-none">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td class="px-6 py-6 text-center text-sm text-gray-500" colspan="6">
+              No articles found.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+     </table>
+    </div>
+   </section>
+   <!-- Categories Section -->
+   <section class="mb-12" id="categories">
+    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+     Category Management
+    </h2>
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+     <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+       <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Category Name
+        </th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
+         Articles
+        </th>
+        <th class="relative px-6 py-3" scope="col">
+         <span class="sr-only">
+          Actions
+         </span>
+        </th>
+       </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+       <% if (Array.isArray(categories) && categories.length) { %>
+         <% categories.forEach(function(c){ %>
+           <tr>
+             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+               <%= c.name %>
+             </td>
+             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+               <%= c.count %>
+             </td>
+             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+               <button type="button" aria-label="Rename category" class="btn-rename-category text-blue-600 hover:text-blue-900 focus:outline-none" data-name="<%- c.name %>">
+                 <i class="fas fa-edit"></i>
+               </button>
+               <button type="button" aria-label="Delete category" class="btn-delete-category text-red-600 hover:text-red-900 focus:outline-none" data-name="<%- c.name %>">
+                 <i class="fas fa-trash-alt"></i>
+               </button>
+             </td>
+           </tr>
+         <% }) %>
+       <% } else { %>
+         <tr>
+           <td class="px-6 py-6 text-center text-sm text-gray-500" colspan="3">
+             No categories yet.
+           </td>
+         </tr>
+       <% } %>
+      </tbody>
+     </table>
+    </div>
+   </section>
+   <!-- Media Library Section -->
+   <section class="mb-12" id="media">
+    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+     Media Library
+    </h2>
+
+    <!-- Upload form -->
+    <form id="uploadForm" class="mb-4 flex items-center space-x-3" enctype="multipart/form-data" method="post" action="/admin/upload">
+      <input id="fileInput" name="image" type="file" accept="image/*" class="block"/>
+      <button id="uploadBtn" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+        <i class="fas fa-upload mr-2"></i> Upload
+      </button>
+      <div id="uploadStatus" class="text-sm text-gray-600"></div>
+    </form>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="mediaGrid">
+     <!-- existing static placeholders -->
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image" class="rounded mb-2 object-cover w-full h-24" src="/upload/placeholder-1.jpg" />
+      <p class="text-xs text-gray-600 truncate w-full text-center">placeholder-1.jpg</p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a city skyline at sunset with orange and purple hues" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/a97fb035-af5d-42da-30b6-8f420ae03962.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       city_skyline_sunset.png
+      </p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a close-up of a laptop keyboard with hands typing" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/805cb072-968b-47f5-ebab-74c801155dea.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       laptop_typing.jpg
+      </p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a green forest with sunlight filtering through tall trees" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/1a7e8253-b14b-40c3-1d6e-911693435be6.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       forest_sunlight.png
+      </p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a sports stadium filled with cheering fans during a game" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/f9ebfa7f-286f-41fa-a84d-a746d28c1a5f.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       stadium_crowd.jpg
+      </p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a medical professional wearing a white coat and stethoscope" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/a4faa0b3-d8a5-41c2-5292-065c3065fa14.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       doctor_stethoscope.png
+      </p>
+     </div>
+     <div class="bg-white rounded-lg shadow p-2 flex flex-col items-center">
+      <img alt="Placeholder image of a wind turbine farm on a green hill under a blue sky" class="rounded mb-2 object-cover w-full h-24" height="100" src="https://storage.googleapis.com/a1aa/image/cf0fec58-f225-40ba-4921-fc571a609cc5.jpg" width="150"/>
+      <p class="text-xs text-gray-600 truncate w-full text-center">
+       wind_turbines.jpg
+      </p>
+     </div>
+    </div>
+   </section>
+  </main>
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 py-4 text-center text-gray-500 text-sm">
+   &copy; <%= year || new Date().getFullYear() %> <%= appName || (title || 'Admin Panel') %>. All rights reserved.
+  </footer>
+  <script>
+    // Mobile menu toggle
+     const mobileMenuButton = document.getElementById('mobile-menu-button');
+     const mobileMenu = document.getElementById('mobile-menu');
+     if (mobileMenuButton && mobileMenu) {
+       mobileMenuButton.addEventListener('click', () => {
+         mobileMenu.classList.toggle('hidden');
+       });
+     }
+
+    // Upload form JS: submit via fetch to /admin/upload and append image to grid
+    (function () {
+      const uploadBtn = document.getElementById('uploadBtn');
+      const fileInput = document.getElementById('fileInput');
+      const status = document.getElementById('uploadStatus');
+      const mediaGrid = document.getElementById('mediaGrid');
+
+      if (!uploadBtn || !fileInput) return;
+
+      uploadBtn.addEventListener('click', async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) { status.textContent = 'Select a file first'; return; }
+
+        status.textContent = 'Uploading...';
+        const fd = new FormData();
+        fd.append('image', file);
+
+        try {
+          const res = await fetch('/admin/upload', { method: 'POST', body: fd });
+          const json = await res.json();
+          if (!json || !json.success) {
+            status.textContent = 'Upload failed';
+            return;
+          }
+          status.textContent = 'Upload successful';
+
+          // append to media grid
+          const url = json.url || ('/upload/' + json.filename);
+          const node = document.createElement('div');
+          node.className = 'bg-white rounded-lg shadow p-2 flex flex-col items-center';
+          node.innerHTML = '<img class="rounded mb-2 object-cover w-full h-24" src="'+url+'" alt="'+json.filename+'"/><p class="text-xs text-gray-600 truncate w-full text-center">'+json.filename+'</p>';
+          mediaGrid.insertBefore(node, mediaGrid.firstChild);
+        } catch (e) {
+          console.error('Upload error:', e);
+          status.textContent = 'Upload error';
+        }
+      });
+    })();
+  </script>
+
+  <!-- Real Articles Published Per Week chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function() {
+      try {
+        const el = document.getElementById('articlesChart');
+        if (!el) return;
+        const labels = <%- JSON.stringify((chart && chart.labels) || []) %>;
+        const data = <%- JSON.stringify((chart && chart.counts) || []) %>;
+        new Chart(el, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Published per week',
+              data,
+              borderColor: 'rgba(37, 99, 235, 1)',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
+              tension: 0.3,
+              fill: true,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: {
+              x: { title: { display: true, text: 'ISO Week' } },
+              y: { title: { display: true, text: 'Articles' }, beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      } catch(e) {
+        console.error('Chart render error:', e);
+      }
+    })();
+  </script>
+ </body>
+</html>

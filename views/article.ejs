@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <% 
+    // compute image path and absolute URL (route may pass siteUrl)
+    const imagePath = article && article.featuredImageId
+      ? ('/upload/' + article.featuredImageId)
+      : (article && article.featuredImageUrl ? article.featuredImageUrl : '/upload/placeholder-1200x630.jpg');
+    const absoluteImage = (typeof siteUrl !== 'undefined' && siteUrl) ? (siteUrl.replace(/\/$/,'') + imagePath) : imagePath;
+    const articlePath = article ? (article.slug ? ('/a/' + article.slug) : ('/a/' + (article._id || ''))) : '';
+    const absoluteUrl = (typeof siteUrl !== 'undefined' && siteUrl) ? (siteUrl.replace(/\/$/,'') + articlePath) : articlePath;
+    const ogTitle = article && article.title ? article.title : (title || 'ViralSurge');
+    const ogDesc = article && (article.excerpt || article.summary) ? (article.excerpt || article.summary) : ('Read the latest on ViralSurge');
+  %>
+
+  <title><%= title || (article && article.title) || 'Article' %> - ViralSurge</title>
+
+  <!-- Open Graph / Social (use siteUrl in route for reliable previews) -->
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="<%= ogTitle %>" />
+  <meta property="og:description" content="<%= ogDesc %>" />
+  <meta property="og:image" content="<%= absoluteImage %>" />
+  <meta property="og:url" content="<%= absoluteUrl %>" />
+  <meta property="og:site_name" content="ViralSurge" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= ogTitle %>" />
+  <meta name="twitter:description" content="<%= ogDesc %>" />
+  <meta name="twitter:image" content="<%= absoluteImage %>" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: { 'gnn-red': '#BB1919','gnn-dark': '#2E2E2E','gnn-light': '#F6F6F6','gnn-blue': '#1D4ED8' }
+      } }
+    }
+  </script>
+  <style>
+    .hero-image { background-size: cover; background-position: center; }
+    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gnn-light">
+  <%- include('partials/header') %>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <% if (article && Array.isArray(article.categories) && article.categories.length) { %>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <% article.categories.slice(0,6).forEach(function(c){ %>
+          <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 border border-blue-200"><%= c %></span>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <h1 class="text-3xl md:text-4xl font-bold text-gnn-dark leading-tight"><%= article && article.title ? article.title : 'Article' %></h1>
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 mt-4 mb-6">
+      <span class="inline-flex items-center"><i class="fas fa-user mr-2 text-gnn-red"></i><%= (article && article.author) ? article.author : 'Staff Reporter' %></span>
+      <span class="inline-flex items-center"><i class="fas fa-clock mr-2 text-gnn-red"></i><%= (article && article.createdAt) ? new Date(article.createdAt).toLocaleString() : '' %></span>
+      <% if (article && article.readingTime) { %>
+        <span class="inline-flex items-center"><i class="fas fa-book-open mr-2 text-gnn-red"></i><%= article.readingTime %> min read</span>
+      <% } %>
+    </div>
+
+    <!-- Social sharing -->
+    <div id="shareBlock" class="flex items-center gap-3 mb-8 border-t border-b border-gray-200 py-3"
+         data-path="<%= article ? (article.slug ? ('/a/' + article.slug) : (article._id ? ('/a/' + article._id) : '')) : '' %>"
+         data-title="<%- (article && article.title) ? article.title.replace(/"/g,'&quot;') : (title || '') %>"
+         data-image="<%= absoluteImage %>">
+      <span class="text-sm font-medium text-gnn-dark">Share:</span>
+
+      <button data-service="twitter" class="share-btn p-2 rounded text-gray-500 hover:text-gnn-red" title="Share on Twitter"><i class="fab fa-twitter text-lg"></i></button>
+      <button data-service="facebook" class="share-btn p-2 rounded text-gray-500 hover:text-gnn-red" title="Share on Facebook"><i class="fab fa-facebook text-lg"></i></button>
+      <button data-service="linkedin" class="share-btn p-2 rounded text-gray-500 hover:text-gnn-red" title="Share on LinkedIn"><i class="fab fa-linkedin text-lg"></i></button>
+      <button data-service="whatsapp" class="share-btn p-2 rounded text-gray-500 hover:text-gnn-red" title="Share on WhatsApp"><i class="fab fa-whatsapp text-lg"></i></button>
+      <button data-service="email" class="share-btn p-2 rounded text-gray-500 hover:text-gnn-red" title="Share via Email"><i class="fas fa-envelope text-lg"></i></button>
+
+      <button id="copyLinkBtn" class="ml-2 text-gray-500 hover:text-gnn-red flex items-center rounded px-3 py-1" title="Copy link" aria-label="Copy link">
+        <i id="copyIcon" class="fas fa-link text-lg mr-2"></i>
+        <span id="copyLabel" class="text-sm">Copy</span>
+      </button>
+    </div>
+
+    <!-- Media gallery -->
+    <% const media = (article && Array.isArray(article.mediaIds) && article.mediaIds.length) ? article.mediaIds : (article && article.featuredImageId ? [article.featuredImageId] : []); %>
+    <% if (media && media.length) { %>
+    <div class="mb-8">
+      <h3 class="text-lg font-bold text-gnn-dark mb-3">Media</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <% media.slice(0,8).forEach(function(m){ %>
+          <% const src = ('/upload/' + m); %>
+          <a href="<%= src %>" target="_blank" class="block overflow-hidden rounded-md bg-white shadow">
+            <img src="<%= src %>" alt="media" class="w-full h-28 object-cover">
+          </a>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Cover image -->
+    <% if (imageUrl) { %>
+      <div class="mb-8 overflow-hidden rounded-lg shadow-md">
+        <img src="<%= imageUrl %>" alt="<%= article && article.title ? article.title : 'Cover image' %>" class="w-full h-auto object-cover">
+      </div>
+    <% } %>
+
+    <!-- Article content -->
+    <article class="bg-white rounded-lg shadow-md p-6 mb-8 prose max-w-none">
+      <% if (article && article.excerpt) { %>
+        <p class="text-lg font-medium text-gray-700 mb-6"><%= article.excerpt %></p>
+      <% } %>
+      <div class="prose max-w-none">
+        <%- (article && article.content) ? article.content : '' %>
+      </div>
+    </article>
+
+    <!-- Tags -->
+    <% if (article && Array.isArray(article.tags) && article.tags.length) { %>
+      <div class="mb-8">
+        <h3 class="text-lg font-bold text-gnn-dark mb-3">Tags:</h3>
+        <div class="flex flex-wrap gap-2">
+          <% article.tags.slice(0, 16).forEach(function(t){ %>
+            <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700 border border-gray-200">#<%= t %></span>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Author bio -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-8">
+      <div class="flex items-start">
+        <div class="w-16 h-16 rounded-full bg-gnn-red flex items-center justify-center text-white text-2xl font-bold mr-4"><%= ((article && article.author) ? article.author.charAt(0) : 'S').toUpperCase() %></div>
+        <div>
+          <h3 class="text-lg font-bold text-gnn-dark"><%= (article && article.author) ? article.author : 'Staff Reporter' %></h3>
+          <% if (article && article.source) { %>
+            <p class="text-sm text-gray-600 mb-2"><%= article.source %></p>
+          <% } %>
+          <% if (article && article.location) { %>
+            <p class="text-sm text-gray-600 mb-2">Location: <%= article.location %></p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related articles (kept minimal) -->
+    <% const related = (typeof relatedArticles !== 'undefined' ? relatedArticles : []); %>
+    <% if (related && related.length) { %>
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold border-l-4 border-gnn-red pl-2 mb-4">Related Articles</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <% related.slice(0,4).forEach(function(a){ 
+             const img = a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a.featuredImageUrl || 'https://via.placeholder.com/600x360?text=No+Image');
+        %>
+          <article class="bg-white rounded-lg shadow-md overflow-hidden">
+            <a href="/a/<%= a._id || a.slug %>">
+              <img src="<%= img %>" alt="<%= a.title %>" class="w-full h-40 object-cover">
+            </a>
+            <div class="p-4">
+              <h3 class="font-bold text-lg"><a href="/a/<%= a._id || a.slug %>" class="hover:text-gnn-red"><%= a.title %></a></h3>
+              <p class="text-gray-600 text-sm"><%= a.excerpt || '' %></p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+  </main>
+
+  <!-- Comments -->
+  <% const flatComments = Array.isArray(article && article.comments) ? article.comments : []; %>
+  <section class="max-w-4xl mx-auto px-4 pb-12">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold mb-4">Comments (<%= flatComments.length %>)</h2>
+
+      <form id="commentForm" class="mb-6 space-y-3">
+        <input name="author" id="commentAuthor" placeholder="Your name" class="w-full border px-3 py-2 rounded" />
+        <textarea id="commentText" name="text" rows="4" placeholder="Write a comment..." class="w-full border px-3 py-2 rounded" required></textarea>
+        <input type="hidden" id="commentParentId" value="">
+        <div class="flex gap-3">
+          <button id="submitComment" class="bg-gnn-red text-white px-4 py-2 rounded">Post comment</button>
+          <button id="cancelReply" type="button" class="hidden text-sm text-gray-600">Cancel reply</button>
+        </div>
+      </form>
+
+      <div id="commentsRoot" class="space-y-4">
+        <% 
+          const byParent = {};
+          flatComments.forEach(c => {
+            const pid = c.parentId || 'root';
+            if (!byParent[pid]) byParent[pid] = [];
+            byParent[pid].push(c);
+          });
+          function renderComments(parentId, depth) {
+            const list = byParent[parentId] || [];
+            for (let i=0;i<list.length;i++) {
+              const c = list[i];
+        %>
+          <div class="comment-item" data-comment-id="<%= c._id %>">
+            <div class="bg-gray-50 p-3 rounded <%= parentId === 'root' ? '' : 'ml-4' %> comment-inner">
+              <div class="text-sm font-semibold text-gnn-dark"><%= c.author || 'Anonymous' %> <span class="text-xs text-gray-500 ml-2"><%= c.createdAt ? new Date(c.createdAt).toLocaleString() : '' %></span></div>
+              <div class="mt-2 text-gray-700"><%= c.text %></div>
+              <div class="mt-2">
+                <button class="reply-btn text-sm text-gnn-red" data-id="<%= c._id %>">Reply</button>
+              </div>
+            </div>
+            <div class="children mt-3 space-y-3" data-children-for="<%= c._id %>">
+              <% renderComments(String(c._id), depth + 1); %>
+            </div>
+          </div>
+        <% 
+            }
+          }
+          renderComments('root', 0);
+        %>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+  <script>
+  (function () {
+    // Share and copy functionality
+    const shareBlock = document.getElementById('shareBlock');
+    const sitePath = shareBlock ? shareBlock.dataset.path : '';
+    const shareTitle = shareBlock ? shareBlock.dataset.title : document.title;
+    const shareImage = shareBlock ? shareBlock.dataset.image : '';
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+    const fullUrl = origin + (sitePath || window.location.pathname + window.location.search);
+
+    function openPopup(url, w = 600, h = 500) {
+      const left = (screen.width / 2) - (w / 2);
+      const top = (screen.height / 2) - (h / 2);
+      window.open(url, 'sharewin', `toolbar=0,status=0,resizable=1,width=${w},height=${h},left=${left},top=${top}`);
+    }
+
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const svc = btn.dataset.service;
+        const text = encodeURIComponent(shareTitle);
+        const url = encodeURIComponent(fullUrl);
+        let link = '#';
+        if (svc === 'twitter') {
+          link = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        } else if (svc === 'facebook') {
+          // Facebook shares use OG tags for image; only URL required
+          link = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        } else if (svc === 'linkedin') {
+          link = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+        } else if (svc === 'whatsapp') {
+          link = `https://api.whatsapp.com/send?text=${text}%20${url}`;
+        } else if (svc === 'email') {
+          const subject = encodeURIComponent(shareTitle);
+          const body = encodeURIComponent(`${shareTitle}\n\n${fullUrl}`);
+          link = `mailto:?subject=${subject}&body=${body}`;
+        }
+        if (svc === 'email') location.href = link; else openPopup(link);
+      });
+    });
+
+    // Robust copy with fallback and animation
+    const copyBtn = document.getElementById('copyLinkBtn');
+    const copyLabel = document.getElementById('copyLabel');
+    const copyIcon = document.getElementById('copyIcon');
+
+    async function copyTextToClipboard(text) {
+      if (!text) return false;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fallthrough */ }
+      }
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const ok = await copyTextToClipboard(fullUrl);
+        const oldIcon = copyIcon ? copyIcon.className : '';
+        if (ok) {
+          if (copyBtn) copyBtn.classList.add('animate-pulse');
+          if (copyLabel) copyLabel.textContent = 'Copied';
+          if (copyIcon) copyIcon.className = 'fas fa-check text-green-500';
+          setTimeout(() => {
+            if (copyBtn) copyBtn.classList.remove('animate-pulse');
+            if (copyLabel) copyLabel.textContent = 'Copy';
+            if (copyIcon) copyIcon.className = oldIcon;
+          }, 1500);
+        } else {
+          if (copyLabel) copyLabel.textContent = 'Copy failed';
+          setTimeout(() => { if (copyLabel) copyLabel.textContent = 'Copy'; }, 1500);
+        }
+      });
+    }
+
+    // Comments: delegate reply handling and insertion (keeps existing behavior)
+    const articleId = '<%= article && (String(article._id) || '') %>';
+    const commentsRoot = document.getElementById('commentsRoot');
+    const commentForm = document.getElementById('commentForm');
+    const commentText = document.getElementById('commentText');
+    const commentAuthor = document.getElementById('commentAuthor');
+    const commentParentId = document.getElementById('commentParentId');
+    const cancelReply = document.getElementById('cancelReply');
+
+    commentsRoot && commentsRoot.addEventListener('click', (e) => {
+      const btn = e.target.closest('.reply-btn');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      commentParentId.value = id;
+      commentText.focus();
+      cancelReply.classList.remove('hidden');
+      window.scrollTo({ top: commentForm.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+    });
+
+    cancelReply && cancelReply.addEventListener('click', () => {
+      commentParentId.value = '';
+      cancelReply.classList.add('hidden');
+    });
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+
+    function createCommentNode(c) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'comment-item';
+      wrapper.setAttribute('data-comment-id', c._id);
+      const inner = document.createElement('div');
+      inner.className = 'bg-gray-50 p-3 rounded comment-inner';
+      inner.innerHTML = `
+        <div class="text-sm font-semibold text-gnn-dark">${escapeHtml(c.author||'Anonymous')} <span class="text-xs text-gray-500 ml-2">${new Date(c.createdAt).toLocaleString()}</span></div>
+        <div class="mt-2 text-gray-700">${escapeHtml(c.text)}</div>
+        <div class="mt-2"><button class="reply-btn text-sm text-gnn-red" data-id="${c._id}">Reply</button></div>
+      `;
+      const children = document.createElement('div');
+      children.className = 'children mt-3 space-y-3';
+      children.setAttribute('data-children-for', c._id);
+
+      wrapper.appendChild(inner);
+      wrapper.appendChild(children);
+      return wrapper;
+    }
+
+    commentForm && commentForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const text = commentText.value.trim();
+      if (!text) return;
+      const author = commentAuthor.value.trim() || 'Anonymous';
+      const parentId = commentParentId.value || null;
+      try {
+        const res = await fetch(`/a/${articleId}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ author, text, parentId })
+        });
+        const json = await res.json();
+        if (!json || !json.success) throw new Error(json && json.error ? json.error : 'Failed');
+        const c = json.comment;
+
+        const node = createCommentNode(c);
+
+        if (c.parentId) {
+          const parentChildren = commentsRoot.querySelector(`[data-children-for="${c.parentId}"]`);
+          if (parentChildren) {
+            node.querySelector('.comment-inner').classList.add('ml-4');
+            parentChildren.appendChild(node);
+          } else {
+            commentsRoot.appendChild(node);
+          }
+        } else {
+          commentsRoot.insertBefore(node, commentsRoot.firstChild);
+        }
+
+        commentText.value = '';
+        commentParentId.value = '';
+        commentAuthor.value = '';
+        cancelReply.classList.add('hidden');
+      } catch (err) {
+        console.error('Comment submit error', err);
+        alert('Could not post comment');
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
