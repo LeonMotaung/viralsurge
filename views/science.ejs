@@ -5,26 +5,40 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="google-adsense-account" content="ca-pub-4456472860533377">
 
-  <title><%= title || (categoryName ? (categoryName + ' - ViralSurge') : 'Science - ViralSurge') %></title>
+  <title><%= title || (categoryName ? categoryName + ' - ViralSurge' : 'Science - ViralSurge') %></title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script>
-    tailwind.config = { theme: { extend: { colors: { 'gnn-red':'#BB1919','gnn-dark':'#2E2E2E','gnn-light':'#F6F6F6','gnn-blue':'#1D4ED8' } } } };
+    tailwind.config = { 
+      theme: { 
+        extend: { 
+          colors: { 
+            'gnn-red':'#BB1919',
+            'gnn-dark':'#2E2E2E',
+            'gnn-light':'#F6F6F6',
+            'gnn-blue':'#1D4ED8' 
+          } 
+        } 
+      } 
+    };
   </script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377" crossorigin="anonymous"></script>
+
   <style>
     .hero-image { background-size: cover; background-position: center; }
-    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-gnn-light text-gray-900">
-  <% /* safe header locals (route provides these) */ %>
+
   <%- include('partials/header') %>
 
   <main class="max-w-7xl mx-auto px-4 py-8">
-    <% const cat = typeof categoryName !== 'undefined' ? categoryName : 'Science'; %>
+    <% const cat = categoryName || 'Science'; %>
 
+    <!-- Hero Section -->
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-3xl font-bold"><%= cat %></h1>
@@ -32,7 +46,9 @@
       </div>
 
       <% if (hero) { 
-           const heroImg = hero.featuredImageId ? ('/upload/' + hero.featuredImageId) : (hero.featuredImageUrl || heroImageUrl || '');
+           const heroImg = hero.featuredImageId 
+                           ? '/upload/' + hero.featuredImageId 
+                           : (hero.featuredImageUrl || heroImageUrl || '');
       %>
       <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="hero-image h-64 md:h-96 flex items-end p-6 text-white" style="background-image: linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)), url('<%= heroImg %>')">
@@ -40,35 +56,53 @@
             <% if (hero.categories && hero.categories.length) { %>
               <span class="bg-gnn-red px-3 py-1 text-sm rounded-full"><%= hero.categories[0] %></span>
             <% } %>
-            <h2 class="text-2xl md:text-4xl font-bold mt-2"><a href="/a/<%= hero._id || hero.slug %>" class="text-white hover:underline"><%= hero.title %></a></h2>
-            <% if (hero.excerpt) { %><p class="mt-2 text-sm md:text-base text-white"><%= hero.excerpt %></p><% } %>
+            <h2 class="text-2xl md:text-4xl font-bold mt-2">
+              <a href="/a/<%= hero._id || hero.slug %>" class="text-white hover:underline"><%= hero.title %></a>
+            </h2>
+            <% if (hero.excerpt) { %>
+              <p class="mt-2 text-sm md:text-base text-white"><%= hero.excerpt %></p>
+            <% } %>
             <div class="flex items-center mt-4 text-sm text-white">
               <i class="far fa-clock mr-2"></i>
               <span><%= hero.createdAt ? new Date(hero.createdAt).toLocaleDateString() : '' %></span>
-              <% if (hero.author) { %><span class="mx-2">|</span><span><%= hero.author %></span><% } %>
+              <% if (hero.author) { %>
+                <span class="mx-2">|</span><span><%= hero.author %></span>
+              <% } %>
             </div>
           </div>
         </div>
         <div class="p-6 bg-white">
-          <a href="/a/<%= hero._id || hero.slug %>" class="text-gnn-red font-bold hover:underline">Read full story <i class="fas fa-arrow-right ml-1"></i></a>
+          <a href="/a/<%= hero._id || hero.slug %>" class="text-gnn-red font-bold hover:underline">
+            Read full story <i class="fas fa-arrow-right ml-1"></i>
+          </a>
         </div>
       </div>
       <% } %>
     </div>
 
+    <!-- Articles & Sidebar -->
     <div class="grid md:grid-cols-3 gap-6">
+      <!-- Articles Grid -->
       <div class="md:col-span-2">
         <% const list = Array.isArray(articles) ? articles : []; %>
         <div class="grid md:grid-cols-2 gap-6 mb-8">
           <% list.slice(0,8).forEach(function(a){ 
-               const img = a && a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a && a.featuredImageUrl ? a.featuredImageUrl : 'https://via.placeholder.com/800x480?text=No+Image');
-               const url = '/a/' + (a && (a._id || a.slug) ? (a._id || a.slug) : '');
+               const img = a && a.featuredImageId 
+                           ? '/upload/' + a.featuredImageId 
+                           : (a && a.featuredImageUrl ? a.featuredImageUrl : 'https://via.placeholder.com/800x480?text=No+Image');
+               const url = '/a/' + (a && (a._id || a.slug) || '');
           %>
           <article class="bg-white rounded-lg shadow-md overflow-hidden">
-            <a href="<%= url %>"><img src="<%= img %>" alt="<%= a && a.title ? a.title : 'Article' %>" class="w-full h-48 object-cover"></a>
+            <a href="<%= url %>">
+              <img src="<%= img %>" alt="<%= a && a.title ? a.title : 'Article' %>" class="w-full h-48 object-cover">
+            </a>
             <div class="p-4">
-              <% if (a && a.categories && a.categories.length) { %><span class="bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full"><%= a.categories[0] %></span><% } %>
-              <h3 class="text-xl font-bold mt-2 mb-2"><a href="<%= url %>" class="hover:text-gnn-red"><%= a && a.title ? a.title : 'Untitled' %></a></h3>
+              <% if (a && a.categories && a.categories.length) { %>
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full"><%= a.categories[0] %></span>
+              <% } %>
+              <h3 class="text-xl font-bold mt-2 mb-2">
+                <a href="<%= url %>" class="hover:text-gnn-red"><%= a && a.title ? a.title : 'Untitled' %></a>
+              </h3>
               <p class="text-gray-600 mb-4"><%= a && a.excerpt ? a.excerpt : '' %></p>
               <div class="flex justify-between text-sm text-gray-500">
                 <time><%= a && a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '' %></time>
@@ -79,18 +113,20 @@
           <% }) %>
         </div>
 
-        <% const pag = (typeof pagination !== 'undefined' && pagination) ? pagination : null; %>
+        <!-- Pagination -->
+        <% const pag = pagination || null; %>
         <% if (pag) { %>
-        <div class="flex items-center justify-between mb-8">
-          <div class="text-sm text-gray-600">Page <%= pag.page || 1 %> of <%= pag.totalPages || 1 %></div>
-          <div class="space-x-2">
-            <% if (pag.prev) { %><a href="<%= pag.prev %>" class="px-3 py-2 bg-white rounded shadow">Prev</a><% } %>
-            <% if (pag.next) { %><a href="<%= pag.next %>" class="px-3 py-2 bg-white rounded shadow">Next</a><% } %>
+          <div class="flex items-center justify-between mb-8">
+            <div class="text-sm text-gray-600">Page <%= pag.page || 1 %> of <%= pag.totalPages || 1 %></div>
+            <div class="space-x-2">
+              <% if (pag.prev) { %><a href="<%= pag.prev %>" class="px-3 py-2 bg-white rounded shadow">Prev</a><% } %>
+              <% if (pag.next) { %><a href="<%= pag.next %>" class="px-3 py-2 bg-white rounded shadow">Next</a><% } %>
+            </div>
           </div>
-        </div>
         <% } %>
       </div>
 
+      <!-- Sidebar -->
       <aside class="space-y-6">
         <div class="bg-white rounded-lg shadow-md p-6">
           <h4 class="font-bold mb-3">Most Read</h4>
@@ -119,24 +155,34 @@
   <%- include('partials/footer') %>
 
   <script>
-    // share/copy handler for index-like cards (same as other category pages)
-    document.addEventListener('click', function (e) {
+    // Share/copy handler for index-like cards
+    document.addEventListener('click', function(e) {
       const btn = e.target.closest('.index-share-btn');
       if (!btn) return;
       const url = btn.dataset.url ? (location.origin + btn.dataset.url) : location.href;
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(() => {
           const old = btn.innerHTML;
           btn.innerHTML = '<i class="fas fa-check text-green-500"></i>';
           btn.classList.add('animate-pulse');
           setTimeout(()=>{ btn.classList.remove('animate-pulse'); btn.innerHTML = old; }, 1400);
-        }).catch(()=>{/* ignore */});
+        }).catch(()=>{});
       } else {
         try {
-          const ta = document.createElement('textarea'); ta.value = url; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          ta.setAttribute('readonly','');
+          ta.style.position='fixed';
+          ta.style.left='-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
         } catch(e){}
       }
     });
   </script>
+
 </body>
 </html>

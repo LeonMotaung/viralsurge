@@ -3,43 +3,253 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="google-adsense-account" content="ca-pub-4456472860533377">
+  <meta name="google-adsense-account" content="ca-pub-4456472860533377">
   <title><%= title || 'Dashboard' %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
      crossorigin="anonymous"></script>
+  <style>
+    /* Brand colors */
+    :root{--gnn-red:#BB1919;--gnn-dark:#2E2E2E;--gnn-light:#F6F6F6}
+    .gnn-progress-bg{background:linear-gradient(90deg,#e6f8ef 0%, #e6f8ef 100%)}
+  </style>
 </head>
 <body class="bg-gnn-light text-gray-900">
   <%- include('partials/header') %>
 
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-4">Welcome, <%= user && (user.name || user.email) %></h1>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="text-sm text-gray-500">Articles</div>
-        <div class="text-2xl font-bold text-gnn-dark"><%= stats.articles %></div>
+  <main class="max-w-6xl mx-auto px-4 py-8">
+  <% // defensive defaults for template variables to avoid ReferenceErrors %>
+  <% const balanceSafe = (typeof balance !== 'undefined' && balance !== null) ? Number(balance) : 0; %>
+  <% const statsSafe = (typeof stats !== 'undefined' && stats) ? stats : {}; %>
+  <% const transactionsSafe = (typeof transactions !== 'undefined' && Array.isArray(transactions)) ? transactions : []; %>
+  <% const recommendedSafe = (typeof recommendedArticles !== 'undefined' && Array.isArray(recommendedArticles)) ? recommendedArticles : []; %>
+  <% const goal = 50; const bal = balanceSafe; const remaining = Math.max(0, (goal - bal)); const pct = Math.min(100, Math.round((bal/goal)*100)); %>
+  <div id="dashboardData" style="display:none" data-balance="<%= balanceSafe %>" data-pct="<%= pct %>" data-remaining="<%= remaining.toFixed(2) %>"></div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">Welcome back, <span class="text-gnn-dark"><%= (user && (user.name || user.email)) || 'Reader' %></span></h1>
+        <p class="text-sm text-gray-600">Your ViralSurge dashboard</p>
       </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="text-sm text-gray-500">Comments</div>
-        <div class="text-2xl font-bold text-gnn-dark"><%= stats.comments %></div>
-      </div>
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="text-sm text-gray-500">Users</div>
-        <div class="text-2xl font-bold text-gnn-dark"><%= stats.users %></div>
+      <div class="flex items-center space-x-4">
+        <div class="text-right">
+          <div class="text-xs text-gray-500">Account Balance</div>
+          <div class="text-lg font-semibold text-green-600">R<%= balanceSafe.toFixed(2) %></div>
+        </div>
+        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow">
+          <span class="font-bold text-gray-700"><%= (user && user.name) ? user.name.charAt(0).toUpperCase() : (user && user.email ? user.email.charAt(0).toUpperCase() : 'U') %></span>
+        </div>
       </div>
     </div>
 
-  <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="font-bold mb-3">Account</h2>
-      <p><strong>Name:</strong> <%= user.name || '—' %></p>
-      <p><strong>Email:</strong> <%= user.email || '—' %></p>
-      <div class="mt-4">
-    <a href="/logout" class="inline-block bg-gnn-red text-white px-4 py-2 rounded">Sign out</a>
+    <!-- Top cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-500">Current Balance</div>
+  <div class="text-2xl font-bold text-green-600">R<%= balanceSafe.toFixed(2) %></div>
       </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-500">Earnings Today</div>
+  <div class="text-2xl font-bold text-gnn-dark">R<%= (Number(statsSafe.today)||0).toFixed(2) %></div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-500">Total Articles Read</div>
+        <div class="text-2xl font-bold text-gnn-dark"><%= (stats && stats.articles) || 0 %></div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-500">Quality Content Shared</div>
+        <div class="text-2xl font-bold text-gnn-dark"><%= (stats && stats.qualityShares) || 0 %></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: Earnings + Withdraw -->
+      <section class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-bold mb-4">Withdrawal Progress</h2>
+  <div class="mb-4">
+          <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <div id="progressBar" class="h-4 rounded-full" style="width:0%; background:linear-gradient(90deg,#34d399,#10b981);"></div>
+          </div>
+          <div class="flex items-center justify-between mt-2 text-sm text-gray-600">
+            <div><strong id="pctText"><%= pct %>%</strong> to goal</div>
+            <div id="remainingText">You need R<%= remaining.toFixed(2) %> more to withdraw</div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button id="withdrawBtn" class="px-4 py-2 rounded text-white font-semibold" style="background:var(--gnn-red);" <%= bal < goal ? 'disabled' : '' %>>Withdraw Earnings</button>
+          <div id="withdrawStatus" class="text-sm text-gray-600"></div>
+        </div>
+
+        <hr class="my-6">
+
+        <h3 class="font-semibold mb-2">Recent activity</h3>
+        <div id="activityList" class="space-y-3 max-h-72 overflow-auto">
+          <% if (transactionsSafe.length) { %>
+            <% transactionsSafe.forEach(function(tx){ %>
+              <div class="flex items-start space-x-3 p-2 rounded hover:bg-gray-50">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center <%=(tx.type === 'credit' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700')%>">
+                  <span class="text-sm font-bold"><%= tx.type === 'credit' ? '+' : (tx.type === 'share' ? 'S' : '-') %></span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-start">
+                    <div class="text-sm"><%= tx.description %></div>
+                    <div class="text-xs text-gray-400"><%= tx.timeAgo || tx.timestamp %></div>
+                  </div>
+                  <div class="text-sm text-gray-500"> <strong><%= tx.amount ? ('R'+ (Number(tx.amount).toFixed(2))) : '' %></strong> <span class="text-xs text-gray-400"> <%= tx.status ? ('· '+tx.status) : '' %></span></div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-sm text-gray-500">No recent activity</div>
+          <% } %>
+        </div>
+      </section>
+
+      <!-- Right: How it works + share CTA + recommended -->
+      <aside class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-bold mb-3">How it works</h3>
+        <ol class="list-decimal list-inside text-sm text-gray-700 space-y-2 mb-4">
+          <li><strong>Read Articles:</strong> Spend at least 1.3 minutes on an article page to earn R0.90.</li>
+          <li><strong>Share Quality Content:</strong> Submit a link to your social post that includes the article link, at least one image, and a 300+ word commentary for review (R0.20 on approval).</li>
+          <li><strong>Withdraw:</strong> Withdraw via FNB eWallet when your balance reaches R50.00. Processing within 24-48 hours.</li>
+        </ol>
+
+        <div class="mb-4">
+          <h4 class="font-semibold">Share Post for Review</h4>
+          <form id="shareForm" class="space-y-2">
+            <div>
+              <label class="text-xs text-gray-600">Social post URL</label>
+              <input id="shareUrl" name="url" type="url" placeholder="https://www.linkedin.com/.." class="w-full border rounded px-2 py-2 text-sm" required>
+            </div>
+            <div>
+              <label class="text-xs text-gray-600">Your commentary (min 300 words)</label>
+              <textarea id="shareCommentary" name="commentary" rows="5" class="w-full border rounded px-2 py-2 text-sm" placeholder="Paste your 300+ word commentary here" required></textarea>
+            </div>
+            <div>
+              <label class="text-xs text-gray-600">Proof image (optional but recommended)</label>
+              <input id="shareImage" name="image" type="file" accept="image/*" class="w-full text-sm" />
+            </div>
+            <div class="flex items-center space-x-2">
+              <button type="submit" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Submit for review</button>
+              <div id="shareStatus" class="text-sm text-gray-600"></div>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <h4 class="font-semibold mb-2">Recommended for you</h4>
+          <div class="space-y-3">
+            <% if (recommendedSafe.length) { %>
+              <% recommendedSafe.slice(0,4).forEach(function(a){ %>
+                <a href="<%= a.url %>" class="flex items-center space-x-3 p-2 rounded hover:bg-gray-50">
+                  <img src="<%= a.thumbnail || '/upload/default.png' %>" alt="thumb" class="w-16 h-12 object-cover rounded">
+                  <div class="flex-1">
+                    <div class="text-sm font-semibold"><%= a.title %></div>
+                    <div class="text-xs text-gray-500">~<%= a.readTime || 2 %> min · Potential R0.90</div>
+                  </div>
+                </a>
+              <% }) %>
+            <% } else { %>
+              <div class="text-sm text-gray-500">No recommendations yet</div>
+            <% } %>
+          </div>
+        </div>
+      </aside>
     </div>
   </main>
 
   <%- include('partials/footer') %>
+
+  <script>
+    // Withdraw button logic and progress update
+    (function(){
+      const dashboardData = document.getElementById('dashboardData');
+      const balance = Number(dashboardData && dashboardData.dataset && dashboardData.dataset.balance ? dashboardData.dataset.balance : 0);
+      const pct = Number(dashboardData && dashboardData.dataset && dashboardData.dataset.pct ? dashboardData.dataset.pct : 0);
+      const remaining = dashboardData && dashboardData.dataset && dashboardData.dataset.remaining ? dashboardData.dataset.remaining : '0.00';
+      const goal = 50;
+      const withdrawBtn = document.getElementById('withdrawBtn');
+      const withdrawStatus = document.getElementById('withdrawStatus');
+      const progressBar = document.getElementById('progressBar');
+      const pctText = document.getElementById('pctText');
+      const remainingText = document.getElementById('remainingText');
+
+      // initialize UI
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (pctText) pctText.textContent = pct + '%';
+      if (remainingText) remainingText.textContent = 'You need R' + Number(remaining).toFixed(2) + ' more to withdraw';
+
+      function updateWithdrawState(){
+        if (!withdrawBtn) return;
+        if (balance >= goal) {
+          withdrawBtn.removeAttribute('disabled');
+          withdrawBtn.classList.remove('opacity-60');
+        } else {
+          withdrawBtn.setAttribute('disabled','true');
+          withdrawBtn.classList.add('opacity-60');
+        }
+      }
+      updateWithdrawState();
+
+      if (withdrawBtn) {
+        withdrawBtn.addEventListener('click', async function(){
+          if (balance < goal) return;
+          if (!confirm('Withdraw R' + balance.toFixed(2) + ' to your registered FNB eWallet?')) return;
+          withdrawBtn.setAttribute('disabled','true');
+          withdrawStatus.textContent = 'Processing...';
+          try {
+            const res = await fetch('/withdraw', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount: balance})});
+            const j = await res.json();
+            if (res.ok) {
+              withdrawStatus.textContent = 'Withdrawal requested. Processing within 24-48 hours.';
+              // Optionally refresh the page to show updated balance
+              setTimeout(()=> location.reload(), 1500);
+            } else {
+              withdrawStatus.textContent = j.error || 'Failed to request withdrawal';
+              withdrawBtn.removeAttribute('disabled');
+            }
+          } catch(e){
+            withdrawStatus.textContent = 'Network error';
+            withdrawBtn.removeAttribute('disabled');
+          }
+        });
+      }
+
+      // Share submission validation and submit
+      const shareForm = document.getElementById('shareForm');
+      const shareStatus = document.getElementById('shareStatus');
+      if (shareForm) {
+        shareForm.addEventListener('submit', async function(e){
+          e.preventDefault();
+          shareStatus.textContent = '';
+          const url = document.getElementById('shareUrl').value.trim();
+          const commentary = document.getElementById('shareCommentary').value.trim();
+          const fileInput = document.getElementById('shareImage');
+          const words = commentary.split(/\s+/).filter(Boolean).length;
+          if (!url) return shareStatus.textContent = 'Please provide the social post URL.';
+          if (words < 300) return shareStatus.textContent = 'Commentary must be at least 300 words.';
+
+          shareStatus.textContent = 'Submitting...';
+          const formData = new FormData();
+          formData.append('url', url);
+          formData.append('commentary', commentary);
+          if (fileInput && fileInput.files && fileInput.files[0]) formData.append('image', fileInput.files[0]);
+
+          try {
+            const res = await fetch('/share-submissions', {method:'POST', body: formData});
+            const j = await res.json();
+            if (res.ok) {
+              shareStatus.textContent = 'Submitted for review. Status: Pending.';
+              shareForm.reset();
+            } else {
+              shareStatus.textContent = j.error || 'Submission failed';
+            }
+          } catch(err) {
+            shareStatus.textContent = 'Network error';
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

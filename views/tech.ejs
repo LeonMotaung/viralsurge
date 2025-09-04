@@ -4,18 +4,85 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="google-adsense-account" content="ca-pub-4456472860533377">
-
   <title><%= title || (categoryName ? (categoryName + ' - ViralSurge') : 'Technology - ViralSurge') %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script>
-    tailwind.config = { theme: { extend: { colors: { 'gnn-red':'#BB1919','gnn-dark':'#2E2E2E','gnn-light':'#F6F6F6','gnn-blue':'#1D4ED8' } } } };
+    tailwind.config = { 
+      theme: { 
+        extend: { 
+          colors: { 
+            'gnn-red':'#BB1919',
+            'gnn-dark':'#2E2E2E',
+            'gnn-light':'#F6F6F6',
+            'gnn-blue':'#1D4ED8'
+          } 
+        } 
+      } 
+    };
   </script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
      crossorigin="anonymous"></script>
   <style>
-    .hero-image { background-size: cover; background-position: center; }
-    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    
+    .hero-image { 
+      background-size: cover; 
+      background-position: center; 
+      position: relative;
+    }
+    
+    .hero-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+    }
+    
+    .article-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+    }
+    
+    .article-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .article-image {
+      transition: transform 0.3s ease;
+    }
+    
+    .article-card:hover .article-image {
+      transform: scale(1.03);
+    }
+    
+    .category-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .sidebar-widget {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    
+    .pagination-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .pagination-btn:hover {
+      background-color: #f3f4f6;
+    }
   </style>
 </head>
 <body class="bg-gnn-light text-gray-900">
@@ -24,54 +91,90 @@
   <main class="max-w-7xl mx-auto px-4 py-8">
     <% const cat = typeof categoryName !== 'undefined' ? categoryName : 'Technology'; %>
 
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <h1 class="text-3xl font-bold"><%= cat %></h1>
-        <div class="text-sm text-gray-600"><%= subtitle || '' %></div>
+    <div class="mb-10">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold text-gray-900"><%= cat %></h1>
+          <% if (subtitle) { %>
+            <p class="text-gray-600 mt-2"><%= subtitle %></p>
+          <% } %>
+        </div>
+        <div class="text-sm text-gray-500">
+          <%= articles.length %> articles
+        </div>
       </div>
 
       <% if (hero) { 
            const heroImg = hero.featuredImageId ? ('/upload/' + hero.featuredImageId) : (hero.featuredImageUrl || heroImageUrl || '');
       %>
-      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="hero-image h-64 md:h-96 flex items-end p-6 text-white" style="background-image: linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)), url('<%= heroImg %>')">
-          <div>
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="hero-image h-64 md:h-96 flex items-end p-8 text-white" style="background-image: url('<%= heroImg %>')">
+          <div class="hero-overlay absolute inset-0"></div>
+          <div class="relative z-10 w-full">
             <% if (hero.categories && hero.categories.length) { %>
-              <span class="bg-gnn-red px-3 py-1 text-sm rounded-full"><%= hero.categories[0] %></span>
+              <span class="category-badge bg-gnn-red"><%= hero.categories[0] %></span>
             <% } %>
-            <h2 class="text-2xl md:text-4xl font-bold mt-2"><a href="/a/<%= hero._id || hero.slug %>" class="text-white hover:underline"><%= hero.title %></a></h2>
-            <% if (hero.excerpt) { %><p class="mt-2 text-sm md:text-base text-white"><%= hero.excerpt %></p><% } %>
-            <div class="flex items-center mt-4 text-sm text-white">
+            <h2 class="text-2xl md:text-4xl font-bold mt-3 leading-tight">
+              <a href="/a/<%= hero._id || hero.slug %>" class="text-white hover:underline"><%= hero.title %></a>
+            </h2>
+            <% if (hero.excerpt) { %>
+              <p class="mt-3 text-lg text-gray-200 max-w-3xl"><%= hero.excerpt %></p>
+            <% } %>
+            <div class="flex items-center mt-5 text-sm text-gray-200">
               <i class="far fa-clock mr-2"></i>
-              <span><%= hero.createdAt ? new Date(hero.createdAt).toLocaleString() : '' %></span>
-              <% if (hero.author) { %><span class="mx-2">|</span><span><%= hero.author %></span><% } %>
+              <span><%= hero.createdAt ? new Date(hero.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %></span>
+              <% if (hero.author) { %>
+                <span class="mx-3">•</span>
+                <span><%= hero.author %></span>
+              <% } %>
+              <% if (hero.views) { %>
+                <span class="mx-3">•</span>
+                <span><%= hero.views.toLocaleString() %> views</span>
+              <% } %>
             </div>
           </div>
         </div>
-        <div class="p-6 bg-white">
-          <a href="/a/<%= hero._id || hero.slug %>" class="text-gnn-red font-bold hover:underline">Read full story <i class="fas fa-arrow-right ml-1"></i></a>
+        <div class="p-6 bg-white border-t border-gray-100">
+          <a href="/a/<%= hero._id || hero.slug %>" class="inline-flex items-center text-gnn-red font-semibold hover:text-gnn-dark transition-colors">
+            Read full story
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
         </div>
       </div>
       <% } %>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-6">
+    <div class="grid md:grid-cols-3 gap-8">
       <div class="md:col-span-2">
         <% const list = Array.isArray(articles) ? articles : []; %>
-        <div class="grid md:grid-cols-2 gap-6 mb-8">
-          <% list.slice(0,8).forEach(function(a){ 
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+          <% list.slice(0,8).forEach(function(a, index){ 
                const img = a && a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a && a.featuredImageUrl ? a.featuredImageUrl : 'https://via.placeholder.com/800x480?text=No+Image');
                const url = '/a/' + (a && (a._id || a.slug) ? (a._id || a.slug) : '');
           %>
-          <article class="bg-white rounded-lg shadow-md overflow-hidden">
-            <a href="<%= url %>"><img src="<%= img %>" alt="<%= a && a.title ? a.title : 'Article' %>" class="w-full h-48 object-cover"></a>
-            <div class="p-4">
-              <% if (a && a.categories && a.categories.length) { %><span class="bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full"><%= a.categories[0] %></span><% } %>
-              <h3 class="text-xl font-bold mt-2 mb-2"><a href="<%= url %>" class="hover:text-gnn-red"><%= a && a.title ? a.title : 'Untitled' %></a></h3>
-              <p class="text-gray-600 mb-4"><%= a && a.excerpt ? a.excerpt : '' %></p>
-              <div class="flex justify-between text-sm text-gray-500">
+          <article class="article-card bg-white rounded-lg shadow-md overflow-hidden">
+            <a href="<%= url %>">
+              <div class="article-image h-48 overflow-hidden">
+                <img src="<%= img %>" alt="<%= a && a.title ? a.title : 'Article' %>" class="w-full h-full object-cover">
+              </div>
+            </a>
+            <div class="p-5">
+              <% if (a && a.categories && a.categories.length) { %>
+                <span class="category-badge bg-blue-100 text-blue-800"><%= a.categories[0] %></span>
+              <% } %>
+              <h3 class="text-xl font-bold mt-3 mb-2 leading-snug">
+                <a href="<%= url %>" class="text-gray-900 hover:text-gnn-red transition-colors">
+                  <%= a && a.title ? a.title : 'Untitled' %>
+                </a>
+              </h3>
+              <p class="text-gray-600 mb-4 line-clamp-2">
+                <%= a && a.excerpt ? a.excerpt : '' %>
+              </p>
+              <div class="flex justify-between items-center text-sm text-gray-500">
                 <time><%= a && a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '' %></time>
-                <span><%= a && a.views ? (a.views + ' views') : '' %></span>
+                <% if (a && a.views) { %>
+                  <span><i class="far fa-eye mr-1"></i><%= a.views.toLocaleString() %></span>
+                <% } %>
               </div>
             </div>
           </article>
@@ -80,71 +183,98 @@
 
         <% const pag = (typeof pagination !== 'undefined' && pagination) ? pagination : null; %>
         <% if (pag) { %>
-        <div class="flex items-center justify-between mb-8">
-          <div class="text-sm text-gray-600">Page <%= pag.page || 1 %> of <%= pag.totalPages || 1 %></div>
-          <div class="space-x-2">
-            <% if (pag.prev) { %><a href="<%= pag.prev %>" class="px-3 py-2 bg-white rounded shadow">Prev</a><% } %>
-            <% if (pag.next) { %><a href="<%= pag.next %>" class="px-3 py-2 bg-white rounded shadow">Next</a><% } %>
+        <div class="flex items-center justify-between mb-8 bg-white rounded-lg shadow-sm p-4">
+          <div class="text-sm text-gray-600">
+            Page <%= pag.page || 1 %> of <%= pag.totalPages || 1 %>
+          </div>
+          <div class="flex space-x-2">
+            <% if (pag.prev) { %>
+              <a href="<%= pag.prev %>" class="pagination-btn border border-gray-300 text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-arrow-left mr-2"></i> Previous
+              </a>
+            <% } %>
+            <% if (pag.next) { %>
+              <a href="<%= pag.next %>" class="pagination-btn bg-gnn-red text-white hover:bg-red-700">
+                Next <i class="fas fa-arrow-right ml-2"></i>
+              </a>
+            <% } %>
           </div>
         </div>
         <% } %>
       </div>
 
       <aside class="space-y-6">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="font-bold mb-3">Most Read</h4>
-          <ol class="list-decimal list-inside space-y-3 text-sm text-gray-700">
-            <% (mostReadList || []).slice(0,5).forEach(function(m) { %>
-              <li>
-                <a href="/a/<%= m._id || m.slug %>" class="font-medium hover:text-gnn-red"><%= m.title %></a>
-                <div class="text-xs text-gray-500"><%= m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '' %></div>
+        <div class="sidebar-widget p-6">
+          <h4 class="font-bold text-lg mb-4 text-gray-900 border-b pb-2">Most Read</h4>
+          <ol class="space-y-4">
+            <% (mostReadList || []).slice(0,5).forEach(function(m, index) { %>
+              <li class="flex items-start">
+                <span class="text-2xl font-bold text-gray-300 mr-3 mt-1"><%= index + 1 %></span>
+                <div>
+                  <a href="/a/<%= m._id || m.slug %>" class="font-medium text-gray-900 hover:text-gnn-red transition-colors block mb-1">
+                    <%= m.title %>
+                  </a>
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <i class="far fa-clock mr-1"></i>
+                    <%= m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '' %>
+                  </div>
+                </div>
               </li>
             <% }) %>
           </ol>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="font-bold mb-3">More in <%= cat %></h4>
-          <ul class="space-y-2 text-sm text-gray-700">
+        <div class="sidebar-widget p-6">
+          <h4 class="font-bold text-lg mb-4 text-gray-900 border-b pb-2">More in <%= cat %></h4>
+          <ul class="space-y-3">
             <% (moreInCategory || []).slice(0,6).forEach(function(mi) { %>
-              <li><a href="/a/<%= mi._id || mi.slug %>" class="hover:text-gnn-red"><%= mi.title %></a></li>
+              <li class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                <a href="/a/<%= mi._id || mi.slug %>" class="text-gray-700 hover:text-gnn-red transition-colors flex items-start">
+                  <i class="fas fa-chevron-right text-gnn-red text-xs mt-1 mr-2"></i>
+                  <span><%= mi.title %></span>
+                </a>
+              </li>
             <% }) %>
           </ul>
+        </div>
+
+        <div class="sidebar-widget p-6">
+          <h4 class="font-bold text-lg mb-4 text-gray-900 border-b pb-2">Newsletter</h4>
+          <p class="text-gray-600 text-sm mb-4">Stay updated with the latest in <%= cat %>.</p>
+          <form class="space-y-3">
+            <input type="email" placeholder="Your email address" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gnn-red focus:border-transparent">
+            <button type="submit" class="w-full bg-gnn-red text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium">
+              Subscribe
+            </button>
+          </form>
         </div>
       </aside>
     </div>
   </main>
 
   <%- include('partials/footer') %>
+  
   <script>
-        // Mobile menu functionality (guarded)
-        const menuToggle = document.getElementById('menuToggle');
-        const closeMenu = document.getElementById('closeMenu');
-        const mobileMenu = document.getElementById('mobileMenu');
+    // Mobile menu functionality
+    (function() {
+      const menuToggle = document.getElementById('menuToggle');
+      const closeMenu = document.getElementById('closeMenu');
+      const mobileMenu = document.getElementById('mobileMenu');
 
-        if (menuToggle && mobileMenu) menuToggle.addEventListener('click', () => mobileMenu.classList.remove('-translate-x-full'));
-        if (closeMenu && mobileMenu) closeMenu.addEventListener('click', () => mobileMenu.classList.add('-translate-x-full'));
-    </script>
-
-  <script>
-    // share/copy handler for index-like cards
-    document.addEventListener('click', function (e) {
-      const btn = e.target.closest('.index-share-btn');
-      if (!btn) return;
-      const url = btn.dataset.url ? (location.origin + btn.dataset.url) : location.href;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => {
-          const old = btn.innerHTML;
-          btn.innerHTML = '<i class="fas fa-check text-green-500"></i>';
-          btn.classList.add('animate-pulse');
-          setTimeout(()=>{ btn.classList.remove('animate-pulse'); btn.innerHTML = old; }, 1400);
-        }).catch(()=>{/* ignore */});
-      } else {
-        try {
-          const ta = document.createElement('textarea'); ta.value = url; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        } catch(e){}
+      if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', () => {
+          mobileMenu.classList.remove('-translate-x-full');
+          document.body.style.overflow = 'hidden';
+        });
       }
-    });
+
+      if (closeMenu && mobileMenu) {
+        closeMenu.addEventListener('click', () => {
+          mobileMenu.classList.add('-translate-x-full');
+          document.body.style.overflow = 'auto';
+        });
+      }
+    })();
   </script>
 </body>
 </html>

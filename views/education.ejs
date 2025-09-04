@@ -5,51 +5,152 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title><%= title || 'Education - ViralSurge' %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Professional styling for education content */
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+    }
+    
+    .article-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .article-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .article-image {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .article-image img {
+      transition: transform 0.3s ease;
+    }
+    
+    .article-card:hover .article-image img {
+      transform: scale(1.03);
+    }
+    
+    .article-content {
+      padding: 1.5rem;
+    }
+    
+    .article-title a {
+      color: #111827;
+      font-weight: 600;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      transition: color 0.2s ease;
+    }
+    
+    .article-title a:hover {
+      color: #2563eb;
+    }
+    
+    .article-excerpt {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-top: 0.5rem;
+    }
+    
+    .article-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .sidebar-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .sidebar-header {
+      color: #111827;
+      font-weight: 600;
+      font-size: 1.125rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1rem;
+    }
+    
+    .trending-list {
+      list-style: none;
+    }
+    
+    .trending-list li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .trending-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .trending-list a {
+      color: #374151;
+      font-weight: 500;
+      transition: color 0.2s ease;
+      display: block;
+    }
+    
+    .trending-list a:hover {
+      color: #2563eb;
+    }
+    
+    @media (max-width: 768px) {
+      .article-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gnn-light text-gray-900">
-  <%- include('partials/header') %>
+<body class="bg-gray-50 text-gray-900">
 
-  <script>
-    // Ensure a mobile menu toggle exists in the header for this page (fallback)
-    (function() {
-      try {
-        if (document.getElementById('menuToggle')) return;
-        var headerRow = document.querySelector('header .max-w-7xl') || document.querySelector('header');
-        if (!headerRow) return;
-        var btn = document.createElement('button');
-        btn.id = 'menuToggle';
-        btn.className = 'md:hidden mr-4 text-red-600 hover:text-purple-600 transition-colors duration-200';
-        btn.setAttribute('aria-label', 'Open menu');
-        btn.innerHTML = '<i class="fas fa-bars text-2xl"></i>';
-        headerRow.insertBefore(btn, headerRow.firstChild);
-        var mobileMenu = document.getElementById('mobileMenu');
-        if (!mobileMenu) return;
-        btn.addEventListener('click', function () { mobileMenu.classList.remove('-translate-x-full'); });
-      } catch (e) { /* non-fatal */ }
-    })();
-  </script>
+  <%- include('partials/header') %>
 
   <main class="max-w-7xl mx-auto px-4 py-8">
     <section class="mb-8">
-      <h1 class="text-3xl font-bold"><%= title || 'Education' %></h1>
+      <h1 class="text-3xl font-bold text-gray-900"><%= title || 'Education' %></h1>
       <% if (subtitle) { %>
         <p class="text-gray-600 mt-2"><%= subtitle %></p>
       <% } %>
     </section>
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="md:col-span-2">
         <% if (hero) { %>
-          <div class="article-card mb-6">
-            <div class="article-image h-64 overflow-hidden">
-              <% const heroImg = hero.featuredImageId ? ('/upload/' + hero.featuredImageId) : (hero.featuredImageUrl || heroImageUrl || ''); %>
+          <% 
+            const heroImg = hero.featuredImageId 
+              ? '/upload/' + hero.featuredImageId 
+              : hero.featuredImageUrl || heroImageUrl || '';
+          %>
+          <div class="article-card mb-8">
+            <div class="article-image h-72 overflow-hidden">
               <img src="<%= heroImg %>" alt="<%= hero.title %>" class="w-full h-full object-cover" />
             </div>
             <div class="article-content">
-              <h2 class="article-title"><a href="<%= hero.slug ? '/a/' + hero.slug : '/a/' + hero._id %>"><%= hero.title %></a></h2>
+              <h2 class="article-title">
+                <a href="<%= hero.slug ? '/a/' + hero.slug : '/a/' + hero._id %>">
+                  <%= hero.title %>
+                </a>
+              </h2>
               <p class="article-excerpt"><%= hero.excerpt %></p>
+              <div class="mt-4 flex items-center text-sm text-gray-500">
+                <span><i class="far fa-clock mr-1"></i> <%= hero.readTime || '5' %> min read</span>
+                <span class="mx-2">•</span>
+                <span><i class="far fa-eye mr-1"></i> <%= hero.views || '1.5k' %> views</span>
+              </div>
             </div>
           </div>
         <% } %>
@@ -57,33 +158,69 @@
         <% if (articles && articles.length) { %>
           <div class="article-grid">
             <% articles.forEach(function(a){ %>
-              <% const img = a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a.featuredImageUrl || 'https://via.placeholder.com/800x480?text=No+Image'); %>
+              <% 
+                const img = a.featuredImageId 
+                  ? '/upload/' + a.featuredImageId 
+                  : a.featuredImageUrl || 'https://via.placeholder.com/800x480?text=No+Image';
+              %>
               <article class="article-card">
-                <div class="article-image h-48"><img src="<%= img %>" alt="<%= a.title %>" class="w-full h-full object-cover"/></div>
+                <div class="article-image h-48">
+                  <img src="<%= img %>" alt="<%= a.title %>" class="w-full h-full object-cover"/>
+                </div>
                 <div class="article-content">
-                  <h3 class="article-title"><a href="<%= a.slug ? '/a/' + a.slug : '/a/' + a._id %>"><%= a.title %></a></h3>
-                  <p class="article-excerpt"><%= a.excerpt %></p>
+                  <h3 class="article-title">
+                    <a href="<%= a.slug ? '/a/' + a.slug : '/a/' + a._id %>">
+                      <%= a.title %>
+                    </a>
+                  </h3>
+                  <p class="article-excerpt text-sm"><%= a.excerpt %></p>
+                  <div class="mt-3 flex items-center text-xs text-gray-500">
+                    <span><i class="far fa-clock mr-1"></i> <%= a.readTime || '4' %> min read</span>
+                  </div>
                 </div>
               </article>
             <% }) %>
           </div>
         <% } else { %>
-          <p class="text-gray-600">No articles found in this section.</p>
+          <div class="text-center py-12">
+            <i class="far fa-book-open text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600">No educational articles found.</p>
+          </div>
         <% } %>
       </div>
 
-      <aside class="sidebar-card p-4">
-        <h4 class="sidebar-header">Most read</h4>
+      <aside class="sidebar-card p-6">
+        <h4 class="sidebar-header">Most Read</h4>
         <div class="sidebar-body">
           <% if (mostReadList && mostReadList.length) { %>
             <ul class="trending-list">
-              <% mostReadList.forEach(function(it){ %>
-                <li><a href="<%= it.slug ? '/a/' + it.slug : '/a/' + it._id %>"><%= it.title %></a></li>
+              <% mostReadList.forEach(function(it, index){ %>
+                <li class="flex items-start">
+                  <span class="text-sm font-bold text-gray-400 mr-3 mt-1"><%= index + 1 %>.</span>
+                  <a href="<%= it.slug ? '/a/' + it.slug : '/a/' + it._id %>" class="text-sm">
+                    <%= it.title %>
+                  </a>
+                </li>
               <% }) %>
             </ul>
           <% } else { %>
-            <p class="text-gray-600">No trending articles yet.</p>
+            <p class="text-gray-600 text-sm">No trending articles yet.</p>
           <% } %>
+        </div>
+        
+        <div class="mt-8">
+          <h4 class="sidebar-header">Learning Resources</h4>
+          <div class="space-y-3 mt-4">
+            <a href="#" class="flex items-center text-sm text-blue-600 hover:text-blue-800">
+              <i class="fas fa-download mr-2"></i> Study Guides
+            </a>
+            <a href="#" class="flex items-center text-sm text-blue-600 hover:text-blue-800">
+              <i class="fas fa-video mr-2"></i> Video Tutorials
+            </a>
+            <a href="#" class="flex items-center text-sm text-blue-600 hover:text-blue-800">
+              <i class="fas fa-book mr-2"></i> E-books Library
+            </a>
+          </div>
         </div>
       </aside>
     </section>
