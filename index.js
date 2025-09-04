@@ -4,6 +4,8 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const multer = require('multer');
+// optional GridFS storage for durable uploads (enable with USE_GRIDFS=1)
+const { GridFsStorage } = require('multer-gridfs-storage');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 
@@ -63,6 +65,7 @@ try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) { /* ignore */ }
 let Article;
 let Comment;
 let upload;
+let gridfsBucket = null; // GridFSBucket instance when using DB-backed storage
 let gfs; // kept for backwards compatibility variable (not used for GridFS now)
 
 async function initDbAndStorage() {
@@ -133,20 +136,44 @@ async function initDbAndStorage() {
     console.error('Model initialization error:', e);
   }
 
-  // Use multer disk storage to save files under public/upload
-  upload = multer({
-    storage: multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, uploadDir);
-      },
-      filename: function (req, file, cb) {
+  // Choose storage: GridFS (durable in Mongo) when enabled, otherwise disk under public/upload
+  if (process.env.USE_GRIDFS === '1' && MONGODB_URI) {
+    const storage = new GridFsStorage({
+      url: MONGODB_URI,
+      options: { useNewUrlParser: true, useUnifiedTopology: true },
+      file: (req, file) => {
         const ext = path.extname(file.originalname || '');
-        const base = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-        cb(null, base + ext);
+        const filename = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+        return {
+          filename,
+          bucketName: 'uploads'
+        };
       }
-    }),
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
-  });
+    });
+    upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+    // setup GridFSBucket for streaming later
+    try {
+      gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
+    } catch (e) {
+      console.warn('GridFS bucket init failed:', e && e.message ? e.message : e);
+      gridfsBucket = null;
+    }
+  } else {
+    // Use multer disk storage to save files under public/upload
+    upload = multer({
+      storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+          cb(null, uploadDir);
+        },
+        filename: function (req, file, cb) {
+          const ext = path.extname(file.originalname || '');
+          const base = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+          cb(null, base + ext);
+        }
+      }),
+      limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
+    });
+  }
 }
 
 initDbAndStorage().catch((e) => console.error('Initialization error:', e));
@@ -414,13 +441,76 @@ app.get('/a/:slug', async (req, res) => {
   }
 });
 
+// simple South Africa section route (/sa)
+app.get('/sa', async (req, res) => {
+  try {
+    const categoryName = 'SA';
+    let hero = null;
+    let articles = [];
+    let mostReadList = [];
+    let moreInCategory = [];
+    let heroImageUrl = '';
+
+    if (Article) {
+      hero = await Article.findOne({ status: 'published', categories: categoryName }).sort({ createdAt: -1 }).lean();
+      const excludeId = hero ? hero._id : null;
+      const q = excludeId ? { status: 'published', categories: categoryName, _id: { $ne: excludeId } } : { status: 'published', categories: categoryName };
+      articles = await Article.find(q).sort({ createdAt: -1 }).limit(20).lean();
+      articles = (articles || []).map(a => ({ ...a, _id: String(a._id) }));
+      if (hero && hero._id) hero._id = String(hero._id);
+      heroImageUrl = hero && hero.featuredImageId ? `/upload/${hero.featuredImageId}` : '';
+
+      mostReadList = await Article.find({ status: 'published', categories: categoryName }).sort({ views: -1 }).limit(5).select('_id title slug createdAt views').lean();
+      moreInCategory = await Article.find({ status: 'published', categories: categoryName }).sort({ createdAt: -1 }).limit(6).select('_id title slug createdAt').lean();
+    }
+
+    // top bar data
+    const topBarList = res.locals.topBarList || [];
+    const topBarDate = res.locals.topBarDate || formatLongDate();
+
+    res.render('sa', {
+      title: 'SA - ViralSurge',
+      categoryName,
+      subtitle: '',
+      hero,
+      heroImageUrl,
+      articles,
+      mostReadList,
+      moreInCategory,
+      topBarDate,
+      topBarList
+    });
+  } catch (e) {
+    console.error('SA route error:', e);
+    res.status(500).send('Server error');
+  }
+});
+
+// 404 handler was moved to the end of this file to avoid catching routes defined after it
+
 // Stream a file from upload folder (keep for compatibility with any /media usage)
 app.get('/media/:filename', async (req, res) => {
   try {
     const filename = path.basename(req.params.filename);
     const filePath = path.join(uploadDir, filename);
-    if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
-    return res.sendFile(filePath);
+    if (fs.existsSync(filePath)) return res.sendFile(filePath);
+
+    // Fallback: if using GridFS, try to stream the file from DB
+    if (gridfsBucket) {
+      try {
+        const filter = { filename };
+        const cursor = mongoose.connection.db.collection('uploads.files').find(filter).limit(1);
+        const fileDoc = await cursor.next();
+        if (!fileDoc) return res.status(404).send('File not found');
+        res.setHeader('Content-Type', fileDoc.contentType || 'application/octet-stream');
+        const readStream = gridfsBucket.openDownloadStreamByName(filename);
+        return readStream.pipe(res);
+      } catch (e) {
+        console.error('GridFS media stream error:', e);
+        return res.status(500).send('Error streaming file');
+      }
+    }
+    return res.status(404).send('File not found');
   } catch (e) {
     console.error('Media route error:', e);
     return res.status(400).send('Invalid request');
@@ -1390,4 +1480,56 @@ app.get('/dashboard', ensureAuthenticated, async (req, res) => {
     console.error('Dashboard error:', e);
     return res.status(500).send('Server error');
   }
+});
+
+// Education category route
+app.get('/education', async (req, res) => {
+  try {
+    const categoryName = 'Education';
+    let hero = null;
+    let articles = [];
+    let mostReadList = [];
+    let moreInCategory = [];
+    let heroImageUrl = '';
+
+    if (Article) {
+      hero = await Article.findOne({ status: 'published', categories: categoryName }).sort({ createdAt: -1 }).lean();
+      const excludeId = hero ? hero._id : null;
+      const q = excludeId ? { status: 'published', categories: categoryName, _id: { $ne: excludeId } } : { status: 'published', categories: categoryName };
+      articles = await Article.find(q).sort({ createdAt: -1 }).limit(20).lean();
+      articles = (articles || []).map(a => ({ ...a, _id: String(a._id) }));
+      if (hero && hero._id) hero._id = String(hero._id);
+      heroImageUrl = hero && hero.featuredImageId ? `/upload/${hero.featuredImageId}` : '';
+
+      mostReadList = await Article.find({ status: 'published', categories: categoryName }).sort({ views: -1 }).limit(5).select('_id title slug createdAt views').lean();
+      moreInCategory = await Article.find({ status: 'published', categories: categoryName }).sort({ createdAt: -1 }).limit(6).select('_id title slug createdAt').lean();
+    }
+
+    // top bar data
+    const topBarList = res.locals.topBarList || [];
+    const topBarDate = res.locals.topBarDate || formatLongDate();
+
+    res.render('education', {
+      title: 'Education - ViralSurge',
+      categoryName,
+      subtitle: '',
+      hero,
+      heroImageUrl,
+      articles,
+      mostReadList,
+      moreInCategory,
+      topBarDate,
+      topBarList
+    });
+  } catch (e) {
+    console.error('Education route error:', e);
+    res.status(500).send('Server error');
+  }
+});
+
+// Final 404 handler (must be last)
+app.use((req, res) => {
+  res.status(404).render('404', {
+    title: 'Page not found'
+  });
 });

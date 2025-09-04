@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
 <meta name="google-adsense-account" content="ca-pub-4456472860533377">
+=======
+    <meta name="google-adsense-account" content="ca-pub-4456472860533377">
+>>>>>>> a6e7738 (first commit)
     <title><%= title || 'ViralSurge' %></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
+     crossorigin="anonymous"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -48,6 +55,18 @@
             .card-hover:hover {
                 transform: translateY(-4px);
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+            /* clamp hero excerpt on small screens so category badge/button remains visible */
+            .clamp-mobile-excerpt {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2; /* show 2 lines on small screens */
+                overflow: hidden;
+            }
+            @screen md {
+                .clamp-mobile-excerpt {
+                    -webkit-line-clamp: 4; /* allow more lines on medium+ */
+                }
             }
             .focus-ring {
                 @apply focus:outline-none focus:ring-2 focus:ring-gnn-red focus:ring-offset-2;
@@ -104,7 +123,7 @@
                         <%= hero ? hero.title : 'Latest story' %>
                     </h1>
                     <% if (hero && hero.excerpt) { %>
-                        <p class="mt-2 text-sm md:text-base text-gray-200"><%= hero.excerpt %></p>
+                        <p class="mt-2 text-sm md:text-base text-gray-200 hidden md:block"><%= hero.excerpt %></p>
                     <% } %>
                     <div class="flex items-center mt-4 text-sm text-gray-300">
                         <i class="far fa-clock mr-2"></i>
@@ -150,7 +169,7 @@
                             <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-3"><%= a && a.excerpt ? a.excerpt : '' %></p>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-3 hidden md:block"><%= a && a.excerpt ? a.excerpt : '' %></p>
                     <div class="flex justify-between text-xs text-gray-500">
                         <span><%= a && a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '' %></span>
                         <span><%= a && a.views ? (a.views + ' views') : '' %></span>
@@ -180,7 +199,7 @@
                             <a href="<%= href %>" class="hover:text-gnn-red focus-ring"><%= a.title || 'Untitled' %></a>
                         </h3>
                         <% if (a.excerpt) { %>
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-2"><%= a.excerpt %></p>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 hidden md:block"><%= a.excerpt %></p>
                         <% } else { %>
                             <img src="<%= img %>" alt="thumb" class="w-full h-28 object-cover rounded mb-4">
                         <% } %>

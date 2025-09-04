@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="google-adsense-account" content="ca-pub-4456472860533377">
+  <title><%= title || 'SA - ViralSurge' %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
+     crossorigin="anonymous"></script>
+</head>
+<body class="bg-gnn-light text-gray-900">
+  <%- include('partials/header') %>
+
+  <script>
+    // Ensure a mobile menu toggle exists in the header for this page (fallback)
+    (function() {
+      try {
+        if (document.getElementById('menuToggle')) return;
+        var headerRow = document.querySelector('header .max-w-7xl') || document.querySelector('header');
+        if (!headerRow) return;
+        var btn = document.createElement('button');
+        btn.id = 'menuToggle';
+        btn.className = 'md:hidden mr-4 text-red-600 hover:text-purple-600 transition-colors duration-200';
+        btn.setAttribute('aria-label', 'Open menu');
+        btn.innerHTML = '<i class="fas fa-bars text-2xl"></i>';
+        headerRow.insertBefore(btn, headerRow.firstChild);
+        var mobileMenu = document.getElementById('mobileMenu');
+        if (!mobileMenu) return;
+        btn.addEventListener('click', function () { mobileMenu.classList.remove('-translate-x-full'); });
+      } catch (e) { /* non-fatal */ }
+    })();
+  </script>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <section class="mb-8">
+      <h1 class="text-3xl font-bold"><%= title || 'SA' %></h1>
+      <% if (subtitle) { %>
+        <p class="text-gray-600 mt-2"><%= subtitle %></p>
+      <% } %>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <% if (hero) { %>
+          <div class="article-card mb-6">
+            <div class="article-image h-64 overflow-hidden">
+              <% const heroImg = hero.featuredImageId ? ('/upload/' + hero.featuredImageId) : (hero.featuredImageUrl || heroImageUrl || ''); %>
+              <img src="<%= heroImg %>" alt="<%= hero.title %>" class="w-full h-full object-cover" />
+            </div>
+            <div class="article-content">
+              <h2 class="article-title"><a href="<%= hero.slug ? '/a/' + hero.slug : '/a/' + hero._id %>"><%= hero.title %></a></h2>
+              <p class="article-excerpt"><%= hero.excerpt %></p>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (articles && articles.length) { %>
+          <div class="article-grid">
+            <% articles.forEach(function(a){ %>
+              <% const img = a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a.featuredImageUrl || 'https://via.placeholder.com/800x480?text=No+Image'); %>
+              <article class="article-card">
+                <div class="article-image h-48"><img src="<%= img %>" alt="<%= a.title %>" class="w-full h-full object-cover"/></div>
+                <div class="article-content">
+                  <h3 class="article-title"><a href="<%= a.slug ? '/a/' + a.slug : '/a/' + a._id %>"><%= a.title %></a></h3>
+                  <p class="article-excerpt"><%= a.excerpt %></p>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-gray-600">No articles found in this section.</p>
+        <% } %>
+      </div>
+
+      <aside class="sidebar-card p-4">
+        <h4 class="sidebar-header">Most read</h4>
+        <div class="sidebar-body">
+          <% if (mostReadList && mostReadList.length) { %>
+            <ul class="trending-list">
+              <% mostReadList.forEach(function(it){ %>
+                <li><a href="<%= it.slug ? '/a/' + it.slug : '/a/' + it._id %>"><%= it.title %></a></li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="text-gray-600">No trending articles yet.</p>
+          <% } %>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
