@@ -20,11 +20,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-K9GS5785');</script>
 <!-- End Google Tag Manager -->
   <% 
-    // compute image path and absolute URL (route may pass siteUrl)
+    // compute image path and absolute URL (route may pass siteUrl). Prefer explicit siteUrl, then SITE_URL env, else fallback to relative path.
     const imagePath = article && article.featuredImageId
       ? ('/upload/' + article.featuredImageId)
       : (article && article.featuredImageUrl ? article.featuredImageUrl : '/upload/placeholder-1200x630.jpg');
-    const absoluteImage = (typeof siteUrl !== 'undefined' && siteUrl) ? (siteUrl.replace(/\/$/,'') + imagePath) : imagePath;
+    const envSite = (typeof process !== 'undefined' && process.env && process.env.SITE_URL) ? process.env.SITE_URL : '';
+    const baseSite = (typeof siteUrl !== 'undefined' && siteUrl) ? siteUrl : (envSite || '');
+    const absoluteImage = baseSite ? (baseSite.replace(/\/$/, '') + imagePath) : imagePath;
     const articlePath = article ? (article.slug ? ('/a/' + article.slug) : ('/a/' + (article._id || ''))) : '';
     const absoluteUrl = (typeof siteUrl !== 'undefined' && siteUrl) ? (siteUrl.replace(/\/$/,'') + articlePath) : articlePath;
     const ogTitle = article && article.title ? article.title : (title || 'ViralSurge');
@@ -38,12 +40,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta property="og:title" content="<%= ogTitle %>" />
   <meta property="og:description" content="<%= ogDesc %>" />
   <meta property="og:image" content="<%= absoluteImage %>" />
+  <meta property="og:image:alt" content="<%= ogTitle %>" />
+  <% /* Optional: hint at image dimensions if known; helps some crawlers */ %>
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:url" content="<%= absoluteUrl %>" />
   <meta property="og:site_name" content="ViralSurge" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="<%= ogTitle %>" />
   <meta name="twitter:description" content="<%= ogDesc %>" />
   <meta name="twitter:image" content="<%= absoluteImage %>" />
+  <meta name="twitter:image:src" content="<%= absoluteImage %>" />
+  <link rel="image_src" href="<%= absoluteImage %>" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
