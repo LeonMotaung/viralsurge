@@ -117,9 +117,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <% media.slice(0,8).forEach(function(m){ %>
           <% const src = ('/upload/' + m); %>
-          <a href="<%= src %>" target="_blank" class="block overflow-hidden rounded-md bg-white shadow">
-            <img src="<%= src %>" alt="media" class="w-full h-28 object-cover">
-          </a>
+          <div class="block overflow-hidden rounded-md bg-white shadow">
+            <img src="<%= src %>" alt="media" class="w-full h-28 object-cover cursor-pointer" data-src="<%= src %>">
+          </div>
         <% }) %>
       </div>
     </div>
@@ -128,7 +128,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <!-- Cover image -->
     <% if (imageUrl) { %>
       <div class="mb-8 overflow-hidden rounded-lg shadow-md">
-        <img src="<%= imageUrl %>" alt="<%= article && article.title ? article.title : 'Cover image' %>" class="w-full h-auto object-cover">
+        <img src="<%= imageUrl %>" alt="<%= article && article.title ? article.title : 'Cover image' %>" class="w-full h-auto object-cover cursor-pointer">
       </div>
     <% } %>
 
@@ -180,8 +180,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
              const img = a.featuredImageId ? ('/upload/' + a.featuredImageId) : (a.featuredImageUrl || 'https://via.placeholder.com/600x360?text=No+Image');
         %>
           <article class="bg-white rounded-lg shadow-md overflow-hidden">
-            <a href="/a/<%= a._id || a.slug %>">
-              <img src="<%= img %>" alt="<%= a.title %>" class="w-full h-40 object-cover">
+              <a href="/a/<%= a._id || a.slug %>">
+              <img src="<%= img %>" alt="<%= a.title %>" class="w-full h-40 object-cover cursor-pointer">
             </a>
             <div class="p-4">
               <h3 class="font-bold text-lg"><a href="/a/<%= a._id || a.slug %>" class="hover:text-gnn-red"><%= a.title %></a></h3>
@@ -246,6 +246,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   </section>
 
   <%- include('partials/footer') %>
+
+  <!-- Image modal -->
+  <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50">
+    <div class="relative flex items-center justify-center w-full h-full p-4">
+      <button id="imageModalClose" class="absolute top-6 right-6 text-white text-3xl leading-none">&times;</button>
+      <img id="modalImg" src="" alt="" class="max-w-[90%] max-h-[80%] rounded shadow-lg" />
+      <div id="modalCaption" class="mt-4 text-white text-sm absolute bottom-8"></div>
+    </div>
+  </div>
 
   <script>
   (function () {
@@ -419,6 +428,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         alert('Could not post comment');
       }
     });
+
+    // Image modal handling
+    const imageModal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalCaption = document.getElementById('modalCaption');
+    const modalClose = document.getElementById('imageModalClose');
+
+    function openImageModal(src, alt) {
+      if (!imageModal || !modalImg) return;
+      modalImg.src = src;
+      modalImg.alt = alt || '';
+      modalCaption.textContent = alt || '';
+      imageModal.classList.remove('hidden');
+      imageModal.classList.add('flex');
+    }
+
+    function closeImageModal() {
+      if (!imageModal) return;
+      imageModal.classList.add('hidden');
+      imageModal.classList.remove('flex');
+      if (modalImg) modalImg.src = '';
+    }
+
+    // Open modal when clicking images that don't navigate to another page (skip related-article images)
+    document.querySelectorAll('main img').forEach(img => {
+      const anchor = img.closest('a');
+      // If image is inside an <a> that points to an article or external page, skip modal to preserve navigation
+      if (anchor && anchor.getAttribute('href') && !anchor.getAttribute('href').includes('/upload') && !anchor.getAttribute('href').includes('/media')) return;
+      img.addEventListener('click', (e) => {
+        e.preventDefault();
+        const src = img.dataset.src || img.getAttribute('src');
+        const alt = img.getAttribute('alt') || '';
+        openImageModal(src, alt);
+      });
+    });
+
+    // Close modal on backdrop click or close button
+    if (modalClose) modalClose.addEventListener('click', closeImageModal);
+    if (imageModal) imageModal.addEventListener('click', (e) => { if (e.target === imageModal) closeImageModal(); });
   })();
   </script>
   <!-- Google Tag Manager (noscript) -->

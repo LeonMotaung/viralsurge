@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
+const https = require('https');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -356,12 +357,30 @@ app.get('/', async (req, res) => {
       d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const topBarDateFormatted = formatLongDate(topBarDate);
 
+    // compute Most Read for today (articles published today, sorted by views)
+    let mostReadList = [];
+    try {
+      if (Article) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0,0,0,0);
+        mostReadList = await Article.find({ status: 'published', createdAt: { $gte: startOfDay } })
+          .sort({ views: -1, createdAt: -1 })
+          .limit(5)
+          .select('_id title slug createdAt views')
+          .lean();
+      }
+    } catch (err) {
+      console.error('Most read (index) lookup error:', err);
+      mostReadList = [];
+    }
+
     // pass logoHeight and topBar data to the template
     res.render('index', {
       title: 'ViralSurge',
       hero,
       heroImageUrl,
       articles,
+      mostReadList,
       logoHeight: app.locals.logoHeight,
       topBarDate: topBarDateFormatted,
       topBarImage,
@@ -1420,6 +1439,42 @@ app.get('/login', (req, res) => {
     error: null,
     success: null
   });
+});
+
+// simple link shortener page (client-side TinyURL)
+app.get('/link', (req, res) => {
+  res.render('link', {
+    ...headerLocals(),
+    title: 'Shorten Link - ViralSurge'
+  });
+});
+
+// Server-side shortener proxy to avoid CORS and client failures
+app.post('/api/shorten', express.json(), async (req, res) => {
+  try {
+    const { url } = req.body || {};
+    if (!url) return res.status(400).json({ ok: false, error: 'Missing url' });
+    // Basic URL validation
+    try { new URL(url); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid url' }); }
+
+    const apiUrl = 'https://tinyurl.com/api-create?url=' + encodeURIComponent(url);
+    https.get(apiUrl, (r) => {
+      let data = '';
+      r.on('data', (chunk) => { data += chunk; });
+      r.on('end', () => {
+        if (r.statusCode >= 200 && r.statusCode < 300) {
+          return res.json({ ok: true, shortUrl: data.trim() });
+        }
+        return res.status(502).json({ ok: false, error: 'Shortener service error' });
+      });
+    }).on('error', (err) => {
+      console.error('Shorten proxy error:', err);
+      return res.status(502).json({ ok: false, error: 'Shortener service error' });
+    });
+  } catch (err) {
+    console.error('Shorten API error:', err);
+    return res.status(500).json({ ok: false, error: 'Server error' });
+  }
 });
 
 // handle login

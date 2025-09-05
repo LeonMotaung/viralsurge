@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shorten Link - ViralSurge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .focus-ring { outline: none; box-shadow: 0 0 0 3px rgba(187,25,25,0.12); }
+  </style>
+</head>
+<body class="bg-gnn-light font-sans min-h-screen">
+  <%- include('partials/header') %>
+
+  <main class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Shorten a link</h1>
+    <p class="text-sm text-gray-600 mb-6">Paste a long URL and get a short link instantly (uses TinyURL public API).</p>
+
+    <form id="shortenForm" class="bg-white rounded-lg shadow p-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Long URL</label>
+      <input id="longUrl" type="url" required placeholder="https://example.com/long/path" class="w-full px-4 py-3 border rounded focus-ring mb-3" />
+
+      <div class="flex items-center gap-3">
+        <button id="shortenBtn" class="bg-gnn-red text-white px-4 py-2 rounded font-semibold hover:bg-red-700">Shorten</button>
+        <button id="clearBtn" type="button" class="text-sm text-gray-600 hover:underline">Clear</button>
+      </div>
+
+      <div id="result" class="mt-4 hidden">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Short URL</label>
+        <div class="flex items-center gap-2">
+          <input id="shortUrl" class="w-full px-3 py-2 border rounded bg-gray-50" readonly />
+          <button id="copyBtn" type="button" class="bg-gnn-blue text-white px-3 py-2 rounded" title="Copy short link"><i class="fas fa-copy"></i></button>
+          <a id="openBtn" class="bg-white border px-3 py-2 rounded text-gray-700 hover:bg-gray-50" target="_blank" rel="noopener">Open</a>
+        </div>
+        <p id="shortHint" class="text-xs text-gray-500 mt-2">You can share or copy the short URL.</p>
+      </div>
+
+      <div id="error" class="mt-4 text-sm text-red-600 hidden"></div>
+    </form>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    (function(){
+      const form = document.getElementById('shortenForm');
+      const longUrlInput = document.getElementById('longUrl');
+      const shortenBtn = document.getElementById('shortenBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const result = document.getElementById('result');
+      const shortUrlInput = document.getElementById('shortUrl');
+      const copyBtn = document.getElementById('copyBtn');
+      const openBtn = document.getElementById('openBtn');
+      const errEl = document.getElementById('error');
+
+      function showError(msg){ errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      function hideError(){ errEl.textContent = ''; errEl.classList.add('hidden'); }
+
+      clearBtn.addEventListener('click', ()=>{
+        longUrlInput.value = '';
+        result.classList.add('hidden');
+        hideError();
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+        const url = (longUrlInput.value || '').trim();
+        if (!url) return showError('Please provide a URL.');
+        try {
+          // Basic URL validation
+          new URL(url);
+        } catch (_) { return showError('Please enter a valid URL (include http:// or https://).'); }
+
+        shortenBtn.disabled = true;
+        shortenBtn.textContent = 'Shortening...';
+
+        try {
+          const res = await fetch('/api/shorten', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+          });
+          const json = await res.json();
+          if (!json || !json.ok) throw new Error(json && json.error ? json.error : 'Shorten failed');
+          const short = json.shortUrl;
+          shortUrlInput.value = short;
+          openBtn.href = short;
+          result.classList.remove('hidden');
+        } catch (err) {
+          console.error('Shorten error', err);
+          showError('Could not shorten link — try again or check the URL.');
+        } finally {
+          shortenBtn.disabled = false;
+          shortenBtn.textContent = 'Shorten';
+        }
+      });
+
+      copyBtn.addEventListener('click', async () => {
+        const txt = shortUrlInput.value || '';
+        if (!txt) return;
+        try {
+          await navigator.clipboard.writeText(txt);
+          copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(()=>{ copyBtn.innerHTML = '<i class="fas fa-copy"></i>'; }, 1200);
+        } catch (e) {
+          // fallback
+          const ta = document.createElement('textarea');
+          ta.value = txt; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
