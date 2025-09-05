@@ -7,6 +7,7 @@
 
     <meta name="google-adsense-account" content="ca-pub-4456472860533377">
     <title><%= title || 'ViralSurge' %></title>
+    <link rel="icon" href="/media/Vs.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4456472860533377"
@@ -101,7 +102,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         ? locals.topBarDate 
         : (typeof topBarDate !== 'undefined' && topBarDate) ? topBarDate : new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       const safeTopBarList = (typeof locals !== 'undefined' && Array.isArray(locals.topBarList)) ? locals.topBarList : ((typeof topBarList !== 'undefined' && Array.isArray(topBarList)) ? topBarList : []);
-      const safeTopBarImage = (typeof locals !== 'undefined' && typeof locals.topBarImage !== 'undefined') ? locals.topBarImage : (typeof topBarImage !== 'undefined' ? topBarImage : null);
+    const safeTopBarImage = (typeof locals !== 'undefined' && typeof locals.topBarImage !== 'undefined') ? locals.topBarImage : (typeof topBarImage !== 'undefined' ? topBarImage : '/media/Vs.png');
       const safeTopBarTitle = (typeof locals !== 'undefined' && typeof locals.topBarTitle !== 'undefined') ? locals.topBarTitle : (typeof topBarTitle !== 'undefined' ? topBarTitle : '');
       const safeTopBarLink = (typeof locals !== 'undefined' && typeof locals.topBarLink !== 'undefined') ? locals.topBarLink : (typeof topBarLink !== 'undefined' ? topBarLink : '#');
     %>
