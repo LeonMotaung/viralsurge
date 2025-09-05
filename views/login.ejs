@@ -39,8 +39,8 @@
 <body class="bg-gnn-light">
     <% /* safe fallbacks so includes don't throw */ %>
     <% const _topBarDate = (typeof topBarDate !== 'undefined' && topBarDate) ? topBarDate : new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); %>
-    <% const _topBarList = Array.isArray(topBarList) ? topBarList : []; %>
-    <% const safeTopBarImage = (typeof locals !== 'undefined' && typeof locals.topBarImage !== 'undefined') ? locals.topBarImage : (typeof topBarImage !== 'undefined' ? topBarImage : '/media/Vs.png'); %>
+    <% const _topBarList = (typeof locals !== 'undefined' && Array.isArray(locals.topBarList)) ? locals.topBarList : (Array.isArray(topBarList) ? topBarList : []); %>
+    <% const _topBarImage = (typeof locals !== 'undefined' && typeof locals.topBarImage !== 'undefined') ? locals.topBarImage : (typeof topBarImage !== 'undefined' ? topBarImage : '/media/Vs.png'); %>
     <% const _topBarTitle = (typeof topBarTitle !== 'undefined' ? topBarTitle : ''); %>
     <% const _topBarLink = (typeof topBarLink !== 'undefined' ? topBarLink : '#'); %>
 
