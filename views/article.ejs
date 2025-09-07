@@ -24,13 +24,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const imagePath = article && article.featuredImageId
       ? ('/upload/' + article.featuredImageId)
       : (article && article.featuredImageUrl ? article.featuredImageUrl : '/upload/placeholder-1200x630.jpg');
-    const envSite = (typeof process !== 'undefined' && process.env && process.env.SITE_URL) ? process.env.SITE_URL : '';
-    const baseSite = (typeof siteUrl !== 'undefined' && siteUrl) ? siteUrl : (envSite || '');
-    const absoluteImage = baseSite ? (baseSite.replace(/\/$/, '') + imagePath) : imagePath;
-    const articlePath = article ? (article.slug ? ('/a/' + article.slug) : ('/a/' + (article._id || ''))) : '';
-    const absoluteUrl = (typeof siteUrl !== 'undefined' && siteUrl) ? (siteUrl.replace(/\/$/,'') + articlePath) : articlePath;
+    const baseSite = (typeof siteUrl !== 'undefined' && siteUrl) ? siteUrl.replace(/\/$/,'') : (process.env.SITE_URL || '');
+    const absoluteImage = (baseSite && !imagePath.match(/^https?:\/\//)) ? (baseSite + imagePath) : imagePath;
+    const absoluteUrl = baseSite ? (baseSite + (article && (article.slug ? ('/a/' + article.slug) : ('/a/' + (article._id||'')))) ) : (article && article.slug ? ('/a/' + article.slug) : '');
     const ogTitle = article && article.title ? article.title : (title || 'ViralSurge');
     const ogDesc = article && (article.excerpt || article.summary) ? (article.excerpt || article.summary) : ('Read the latest on ViralSurge');
+    // safe image URL: prefer a passed-in locals.imageUrl, otherwise use computed absoluteImage
+    const imageUrlSafe = (typeof locals !== 'undefined' && typeof locals.imageUrl !== 'undefined' && locals.imageUrl) ? locals.imageUrl : absoluteImage;
   %>
 
   <title><%= title || (article && article.title) || 'Article' %> - ViralSurge</title>
@@ -41,7 +41,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <meta property="og:description" content="<%= ogDesc %>" />
   <meta property="og:image" content="<%= absoluteImage %>" />
   <meta property="og:image:alt" content="<%= ogTitle %>" />
-  <% /* Optional: hint at image dimensions if known; helps some crawlers */ %>
+  <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="<%= absoluteUrl %>" />
@@ -126,9 +126,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <% } %>
 
     <!-- Cover image -->
-    <% if (imageUrl) { %>
+    <% if (imageUrlSafe) { %>
       <div class="mb-8 overflow-hidden rounded-lg shadow-md">
-        <img src="<%= imageUrl %>" alt="<%= article && article.title ? article.title : 'Cover image' %>" class="w-full h-auto object-cover cursor-pointer">
+        <img src="<%= imageUrlSafe %>" alt="<%= article && article.title ? article.title : 'Cover image' %>" class="w-full h-auto object-cover cursor-pointer" data-src="<%= imageUrlSafe %>">
       </div>
     <% } %>
 
@@ -453,16 +453,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     // Open modal when clicking images that don't navigate to another page (skip related-article images)
     document.querySelectorAll('main img').forEach(img => {
-      const anchor = img.closest('a');
-      // If image is inside an <a> that points to an article or external page, skip modal to preserve navigation
-      if (anchor && anchor.getAttribute('href') && !anchor.getAttribute('href').includes('/upload') && !anchor.getAttribute('href').includes('/media')) return;
-      img.addEventListener('click', (e) => {
-        e.preventDefault();
-        const src = img.dataset.src || img.getAttribute('src');
-        const alt = img.getAttribute('alt') || '';
-        openImageModal(src, alt);
-      });
-    });
+       const anchor = img.closest('a');
+       // If image is inside an <a> that points to an article or external page, skip modal to preserve navigation
+       if (anchor && anchor.getAttribute('href') && !anchor.getAttribute('href').includes('/upload') && !anchor.getAttribute('href').includes('/media')) return;
+       img.addEventListener('click', (e) => {
+         e.preventDefault();
+         const src = img.dataset.src || img.getAttribute('src');
+         const alt = img.getAttribute('alt') || '';
+         openImageModal(src, alt);
+       });
+     });
 
     // Close modal on backdrop click or close button
     if (modalClose) modalClose.addEventListener('click', closeImageModal);

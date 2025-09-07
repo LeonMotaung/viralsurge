@@ -447,10 +447,12 @@ app.get('/a/:slug', async (req, res) => {
     const topBarDate = article && article.createdAt ? new Date(article.createdAt) : new Date();
     const topBarDateFormatted = formatLongDate(topBarDate);
 
-    res.render('article', {
-      title: article.metaTitle || article.title,
+    const siteUrl = (req.protocol || 'https') + '://' + req.get('host');
+    return res.render('article', {
       article,
-      imageUrl,
+      title: article.title,
+      // pass siteUrl so article.ejs builds absolute og:image and og:url
+      siteUrl,
       topBarDate: topBarDateFormatted,
       topBarList
     });
