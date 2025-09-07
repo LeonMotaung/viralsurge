@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const https = require('https');
+const mime = require('mime-types');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -514,7 +515,15 @@ app.get('/media/:filename', async (req, res) => {
   try {
     const filename = path.basename(req.params.filename);
     const filePath = path.join(uploadDir, filename);
-    if (fs.existsSync(filePath)) return res.sendFile(filePath);
+
+    // Serve disk file if exists
+    if (fs.existsSync(filePath)) {
+      // set Content-Type (sendFile would normally do this, but set here explicitly for HEAD checks)
+      const ct = mime.lookup(filePath) || 'application/octet-stream';
+      res.setHeader('Content-Type', ct);
+      if (req.method === 'HEAD') return res.status(200).end();
+      return res.sendFile(filePath);
+    }
 
     // Fallback: if using GridFS, try to stream the file from DB
     if (gridfsBucket) {
@@ -523,7 +532,10 @@ app.get('/media/:filename', async (req, res) => {
         const cursor = mongoose.connection.db.collection('uploads.files').find(filter).limit(1);
         const fileDoc = await cursor.next();
         if (!fileDoc) return res.status(404).send('File not found');
-        res.setHeader('Content-Type', fileDoc.contentType || 'application/octet-stream');
+        // set a content-type (GridFS store may have contentType stored)
+        const ct = fileDoc.contentType || mime.lookup(fileDoc.filename) || 'application/octet-stream';
+        res.setHeader('Content-Type', ct);
+        if (req.method === 'HEAD') return res.status(200).end();
         const readStream = gridfsBucket.openDownloadStreamByName(filename);
         return readStream.pipe(res);
       } catch (e) {
